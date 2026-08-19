@@ -127,9 +127,6 @@ Data-quality gates are treated as blocking, not advisory.
 | Storage | SQLite (WAL), point-in-time membership snapshots |
 | Delivery | static HTML consoles, Telegram alerts |
 
-Python, SQLite, Playwright, launchd. No framework, no server, no external CSS or
-JavaScript — every page is self-contained and opens from disk.
-
----
+Python, SQLite, Playwright, launchd. 
 
 *Screenshots show a paper trading account. No real capital is at risk.*
