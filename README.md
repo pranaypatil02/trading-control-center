@@ -118,7 +118,7 @@ warning above the table because the ranking is misleading without it.
 | **Language** | Python 3.11 |
 | **Data** | pandas, numpy, scipy |
 | **Storage** | SQLite (WAL mode, async background writer, point-in-time snapshot tables) |
-| **Frontend** | Hand-written HTML/CSS/SVG. No framework, no build step, no JS dependencies — pages open straight from disk. (Web fonts are the one external request.) |
+| **Frontend** | HTML/CSS/SVG. No framework, no build step, no JS dependencies — pages open straight from disk. (Web fonts are the one external request.) |
 | **Charts** | SVG generated server-side; no charting library |
 | **Automation** | launchd (62 agents), GitHub Actions |
 | **Scraping** | Playwright (headless Chromium), lxml |
