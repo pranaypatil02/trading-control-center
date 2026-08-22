@@ -65,18 +65,7 @@ resized in place or opened standalone.
 Both maps expose selectable axes, colour, bubble size, sector, and plot scope.
 Missing inputs are omitted and disclosed instead of being converted to zero.
 
-### Single-stock research
 
-<table>
-  <tr>
-    <td width="50%"><img src="screenshots/15-stock-earnings-and-price.png" alt="Apple ResearchCharts earnings and price history"></td>
-    <td width="50%"><img src="screenshots/16-stock-forecasting.png" alt="Apple ResearchCharts forecasting corridor and annualized return table"></td>
-  </tr>
-  <tr>
-    <td><b>Earnings and price.</b> Weekly price is compared with the company's own normal multiple and a metric-appropriate fair-value line.</td>
-    <td><b>Forecasting.</b> Consensus vintages, analyst dispersion, valuation corridors, and annualized forward returns make the estimate assumptions inspectable.</td>
-  </tr>
-</table>
 
 ### Retrieval and operational freshness
 
