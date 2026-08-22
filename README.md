@@ -1,8 +1,8 @@
 # Trading Control Center
 
 An operations console I designed and built for a personal quantitative trading
-system: **33 strategies, 60 scheduled jobs, 160 Python modules, 227 test files,
-one shared brokerage account.**
+system: **40 registered strategies, 61 health-reporting jobs, 160+ Python
+modules, 3,800+ tests, and one shared paper brokerage account.**
 
 This repository holds **screenshots and design notes only**. The implementation
 is private.
@@ -11,7 +11,7 @@ is private.
 
 ## The product problem
 
-Thirty-odd strategies had accumulated over two years — bots, signals, research
+Forty strategies had accumulated over two years — bots, signals, research
 studies — each writing its own HTML report to disk. The failure mode wasn't a
 missing feature. It was that **nobody could tell which of them were still
 running**, and a report on disk that stopped updating looked identical to one
@@ -27,6 +27,69 @@ earns its place against one of them:
 One screen, no scrolling required to reach the verdict. Money first, because
 that is what the reader came for; operational health below it, because that is
 what they need when the money looks wrong.
+
+---
+
+## Product tour
+
+The console is the navigation and operating layer; the underlying strategy and
+research reports keep their own analytical depth. Embedded reports can be
+resized in place or opened standalone.
+
+### Strategy operations and research
+
+<table>
+  <tr>
+    <td width="50%"><img src="screenshots/09-strategy-workspace.png" alt="Strategy workspace showing health, cadence, status, and an embedded paper report"></td>
+    <td width="50%"><img src="screenshots/13-report-browser.png" alt="Research report browser with a performance decision gate embedded in the console"></td>
+  </tr>
+  <tr>
+    <td><b>Strategy workspace.</b> Cadence, operating status, job evidence, and the latest strategy-specific report share one screen.</td>
+    <td><b>Research browser.</b> Backtests, diagnostics, valuation studies, and paper results remain separate artifacts but gain one consistent frame.</td>
+  </tr>
+</table>
+
+### S&P 500 cross-sectional research
+
+<table>
+  <tr>
+    <td width="50%"><img src="screenshots/11-sp500-quality-map.png" alt="Interactive S&P 500 quality map embedded in the Control Center"></td>
+    <td width="50%"><img src="screenshots/12-sp500-valuation-map.png" alt="Interactive S&P 500 valuation map embedded in the Control Center"></td>
+  </tr>
+  <tr>
+    <td><b>Quality map.</b> Compare profitability, cash-flow generation, financial strength, growth, and predictability across current constituents.</td>
+    <td><b>Valuation map.</b> Compare conservative upside, historical and sector multiples, enterprise valuation, growth, leverage, and market cap.</td>
+  </tr>
+</table>
+
+Both maps expose selectable axes, colour, bubble size, sector, and plot scope.
+Missing inputs are omitted and disclosed instead of being converted to zero.
+
+### Single-stock research
+
+<table>
+  <tr>
+    <td width="50%"><img src="screenshots/15-stock-earnings-and-price.png" alt="Apple ResearchCharts earnings and price history"></td>
+    <td width="50%"><img src="screenshots/16-stock-forecasting.png" alt="Apple ResearchCharts forecasting corridor and annualized return table"></td>
+  </tr>
+  <tr>
+    <td><b>Earnings and price.</b> Weekly price is compared with the company's own normal multiple and a metric-appropriate fair-value line.</td>
+    <td><b>Forecasting.</b> Consensus vintages, analyst dispersion, valuation corridors, and annualized forward returns make the estimate assumptions inspectable.</td>
+  </tr>
+</table>
+
+### Retrieval and operational freshness
+
+<table>
+  <tr>
+    <td width="50%"><img src="screenshots/10-stock-research.png" alt="Control Center stock search resolving Apple to its ResearchCharts report"></td>
+    <td width="50%"><img src="screenshots/14-data-freshness.png" alt="Data freshness screen with cadence-aware health states"></td>
+  </tr>
+  <tr>
+    <td><b>One search surface.</b> The same control finds strategies, bots, reports, tickers, and company names.</td>
+    <td><b>Cadence-aware freshness.</b> Daily, intraday, monthly, and on-demand systems are judged against their own expected rhythm.</td>
+  </tr>
+</table>
 
 ---
 
@@ -98,7 +161,7 @@ Per-signal contribution, sorted. Values redacted; the structure is the point.
 ![Signal attribution](screenshots/06-signal-attribution.png)
 
 ### Progressive disclosure — three-level navigation
-Two levels vertical, third horizontal. 33 strategies across 7 families stay
+Two levels vertical, third horizontal. 40 strategies across 7 families stay
 navigable without a search box being the only way in.
 
 ![Information architecture](screenshots/07-information-architecture.png)
@@ -120,11 +183,11 @@ warning above the table because the ranking is misleading without it.
 | **Storage** | SQLite (WAL mode, async background writer, point-in-time snapshot tables) |
 | **Frontend** | HTML/CSS/SVG. No framework, no build step, no JS dependencies — pages open straight from disk. (Web fonts are the one external request.) |
 | **Charts** | SVG generated server-side; no charting library |
-| **Automation** | launchd (62 agents), GitHub Actions |
+| **Automation** | launchd (63 agents), GitHub Actions |
 | **Scraping** | Playwright (headless Chromium), lxml |
 | **ML** | LightGBM, scikit-learn — day-type classifier, benchmarked against a rules baseline |
 | **Security** | PBKDF2 + Fernet encrypted local credential vault; no secrets in source or logs |
-| **Testing** | pytest — 227 test files, ~3,100 tests, run as a release gate |
+| **Testing** | pytest — 3,800+ tests, run as a release gate |
 | **Validation** | pydantic |
 
 ### API and data integrations
@@ -133,7 +196,7 @@ warning above the table because the ranking is misleading without it.
 |---|---|---|
 | **Alpaca** | Paper brokerage — orders, fills, positions, account equity | REST |
 | **Polygon** | Minute bars, options NBBO quotes | REST |
-| **FastGraphs** | Fundamental valuation, normal P/E, analyst estimates | JWT-authenticated REST, rate-budgeted |
+| **ResearchCharts** | Fundamental valuation, normal P/E, analyst estimates | JWT-authenticated REST, rate-budgeted |
 | **Financial Modeling Prep** | Fundamentals, earnings calendar, EOD OHLC | REST |
 | **Tradier** | Options chains, sandbox order routing | REST |
 | **yfinance** | Live quotes, 52-week ranges, market cap | Library |
