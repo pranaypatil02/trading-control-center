@@ -36,23 +36,43 @@ The console is the navigation and operating layer; the underlying strategy and
 research reports keep their own analytical depth. Embedded reports can be
 resized in place or opened standalone.
 
-### Grounded research and operational control
+### Case study — evidence-grounded research agent
 
-<table>
-  <tr>
-    <td width="50%"><img src="screenshots/17-research-agent.png" alt="Read-only research agent returning four NVIDIA fiscal periods from local SEC evidence with filing links and completion time"></td>
-    <td width="50%"><img src="screenshots/18-job-observability.png" alt="Bots and Jobs observability view showing cadence-aware verdicts and recent-run reliability strips"></td>
-  </tr>
-  <tr>
-    <td><b>Evidence-grounded copilot.</b> Local Qwen handles open-ended questions, while bounded financial queries bypass the model and return parsed SEC facts with accession-level provenance. Paid web research is explicit, never a silent fallback; the entire surface is read-only.</td>
-    <td><b>Operational observability.</b> Each job is judged against its own observed cadence. Verdict, last run, normal rhythm, 90-day failure count, and a run-by-run reliability strip make intermittent and persistent failure visually distinct.</td>
-  </tr>
-</table>
+![Read-only research agent](screenshots/17-research-agent.png)
 
-This is an authority decision as much as an AI feature: the agent can inspect
-registered tools and explain evidence, but it cannot place orders or change a
-strategy. Every response reports its route, source links, data dates,
-missingness, and elapsed time.
+**Problem.** A generic chatbot could describe a company, but it could not be
+trusted to know which local report was current, distinguish a quarter from a
+full fiscal year, or admit when evidence was missing.
+
+**Product decision.** I built a read-only research agent over registered project
+tools and a local SEC filing corpus. In the example above, “Show me NVIDIA's
+last 4 earnings” is answered by a deterministic financial-data path—not model
+memory—with filing dates, period scope, accession links, missingness, and
+completion time. Local Qwen handles interpretation; DeepSeek is reserved for an
+explicitly selected web-research route, so a vague question cannot silently
+spend API credits.
+
+**Guardrail.** The agent can inspect and explain, but it cannot place orders or
+change a strategy. A response that does not inspect evidence is discarded
+instead of being presented as financial research.
+
+### Case study — observability for 72 automated jobs
+
+![Job observability](screenshots/18-job-observability.png)
+
+**Problem.** A successful run record never expired, so a bot that stopped
+months ago could still look healthy. A single global freshness threshold also
+misclassified weekend, intraday, daily, and monthly jobs.
+
+**Product decision.** I replaced the binary badge with cadence-aware health.
+Each job now exposes its verdict, last run, normal observed rhythm, 90-day
+failure count, owner, and run-by-run reliability strip. Exceptions open first;
+healthy groups collapse. This distinguishes one transient failure from a job
+that failed 57 of its last 58 runs and makes the next operator action visible.
+
+**Outcome.** The first audit found 23 false-green jobs, including one that had
+been silent for 76 days. Unowned and unmonitored systems are now explicit
+states—not implied successes.
 
 ### Strategy operations and research
 
