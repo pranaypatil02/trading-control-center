@@ -1,8 +1,21 @@
-# Trading Control Center
+# Automated Trading Research & Operations Platform
 
-An operations console I designed and built for a personal quantitative trading
-system: **40 registered strategies, 72 health-reporting jobs, 180+ Python
-modules, 4,200+ tests, and one shared paper brokerage account.**
+I designed and built an end-to-end product for developing, validating, and
+operating systematic equity and options strategies. It brings market and
+fundamental data, point-in-time research, backtesting, paper execution,
+scheduling, monitoring, reporting, and evidence-grounded AI research into one
+platform.
+
+The **Trading Control Center** shown here is the platform's operating interface,
+not the whole product.
+
+| Platform scale | Current footprint |
+|---|---:|
+| Registered strategies and research studies | **40 across 7 families** |
+| Automated operations | **72 health-reporting jobs · 65 scheduled agents** |
+| Historical market data | **114.5M options minute bars · 6.6M daily-price rows** |
+| Code and verification | **180+ Python modules · 4,200+ tests** |
+| External systems | **12+ market-data, brokerage, filing, research, and alert integrations** |
 
 This repository holds **screenshots and design notes only**. The implementation
 is private.
@@ -11,30 +24,101 @@ is private.
 
 ## The product problem
 
-Forty strategies had accumulated over two years — bots, signals, research
-studies — each writing its own HTML report to disk. The failure mode wasn't a
-missing feature. It was that **nobody could tell which of them were still
-running**, and a report on disk that stopped updating looked identical to one
-that was fine.
+The original goal was to turn trading hypotheses into repeatable automated
+strategies. Over time that expanded into momentum, mean-reversion, seasonality,
+valuation, earnings, and short-dated options systems, each using different data
+sources, horizons, schedules, and evaluation rules.
 
-So the console answers four questions, in this order, and everything on the page
-earns its place against one of them:
+The hard product problem became the entire lifecycle:
+
+> **Can I move from an idea to a point-in-time backtest, promote only credible
+> strategies to paper trading, operate them safely, and learn from actual
+> outcomes?**
+
+Building more strategies without shared infrastructure created predictable
+failure modes: duplicated data acquisition, inconsistent assumptions,
+survivorship-biased research, reports with no common navigation, and bots whose
+last successful run never expired. The platform was built to make each stage
+explicit and auditable.
+
+## Platform lifecycle
+
+```mermaid
+flowchart LR
+    A[Market data APIs<br/>fundamentals and SEC filings] --> B[Normalized local data<br/>with provenance]
+    B --> C[Research and<br/>feature engineering]
+    C --> D[Point-in-time<br/>backtests]
+    D --> E{Evidence gate}
+    E -->|Promote| F[Paper strategy<br/>automation]
+    E -->|Reject or refine| G[Research archive]
+    F --> H[Orders, fills,<br/>positions and P&L]
+    H --> I[Attribution and<br/>learning loop]
+    B --> J[Reports, screens<br/>and research agent]
+    F --> K[Job health and<br/>incident detection]
+    I --> L[Trading Control Center]
+    J --> L
+    K --> L
+```
+
+| Platform capability | Product responsibility |
+|---|---|
+| **Data foundation** | Ingest and reconcile prices, fundamentals, filings, estimates, options quotes, constituents, and corporate actions from multiple vendors. |
+| **Strategy laboratory** | Run survivorship-aware, point-in-time backtests; compare variants against SPY; archive assumptions and results before promotion. |
+| **Automation layer** | Schedule scans and bots across intraday, daily, monthly, and quarterly cadences; isolate paper execution from the disabled live path. |
+| **Decision support** | Turn the S&P 500 into searchable valuation, quality, momentum, seasonality, volatility, and recovery research surfaces. |
+| **Operations layer** | Track ownership, freshness, failures, fills, positions, P&L, and strategy-specific evidence across the automated estate. |
+| **Learning loop** | Compare simulated assumptions with actual paper fills and attribute outcomes back to strategy, signal source, and execution quality. |
+
+### Strategy portfolio
+
+| Family | Examples in the platform |
+|---|---|
+| **Options and intraday** | 0DTE pullback systems, regime classification, IV snapshots, options-chain validation, paper order routing, and reconciliation. |
+| **Earnings and catalysts** | Pre-earnings opportunity scoring, post-earnings drift, earnings-movement scoring, filing ingestion, and estimate-revision research. |
+| **Momentum and mean reversion** | Directional momentum, quarterly momentum, monthly streaks, oversold snap, and combined technical/fundamental/momentum screens. |
+| **Seasonality** | Monthly stock and options selection, rolling win-rate studies, tenure-constrained universes, and SPY-relative evaluation. |
+| **Fundamental and valuation** | Multi-method fair value, sector-relative P/E, P/S and PEG maps, undervaluation screens, quality pillars, and earnings forecasts. |
+| **Market behaviour** | Volatility distributions, annual ranges, drawdown/recovery, quarterly winners, and index-relative performance studies. |
+| **Platform operations** | Strategy registry, simulated accounts, evidence ledger, scorecards, performance attribution, reporting, and job health. |
+
+## The Control Center — one interface for the platform
+
+At 40 strategies, separate report files stopped scaling as a product. The
+Control Center became the common navigation and operating layer. It answers
+four questions, in order:
 
 > **Am I making money · Is it working · Is it running · Is anything broken**
 
 ![Executive overview](screenshots/01-executive-overview.png)
 
-One screen, no scrolling required to reach the verdict. Money first, because
-that is what the reader came for; operational health below it, because that is
-what they need when the money looks wrong.
+One screen reaches the verdict without requiring the operator to inspect every
+bot. Money comes first; strategy evidence and operational health explain what
+happened and whether the result can be trusted.
 
 ---
 
-## Product tour
+## Product surfaces
 
 The console is the navigation and operating layer; the underlying strategy and
 research reports keep their own analytical depth. Embedded reports can be
 resized in place or opened standalone.
+
+### Strategy lifecycle and operations
+
+<table>
+  <tr>
+    <td width="50%"><img src="screenshots/09-strategy-workspace.png" alt="Strategy workspace showing health, cadence, status, and an embedded paper report"></td>
+    <td width="50%"><img src="screenshots/13-report-browser.png" alt="Research report browser with a performance decision gate embedded in the console"></td>
+  </tr>
+  <tr>
+    <td><b>One home per strategy.</b> Objective, lifecycle stage, cadence, job evidence, operating status, and the latest paper result share one workspace.</td>
+    <td><b>Research before promotion.</b> Backtests, variant comparisons, diagnostics, and decision gates stay as immutable research artifacts but gain one consistent discovery layer.</td>
+  </tr>
+</table>
+
+The registry distinguishes research studies, paper strategies, production
+systems, and dormant work. A promising backtest does not silently become a bot;
+promotion is an explicit product decision with evidence attached.
 
 ### Case study — evidence-grounded research agent
 
@@ -73,19 +157,6 @@ that failed 57 of its last 58 runs and makes the next operator action visible.
 **Outcome.** The first audit found 23 false-green jobs, including one that had
 been silent for 76 days. Unowned and unmonitored systems are now explicit
 states—not implied successes.
-
-### Strategy operations and research
-
-<table>
-  <tr>
-    <td width="50%"><img src="screenshots/09-strategy-workspace.png" alt="Strategy workspace showing health, cadence, status, and an embedded paper report"></td>
-    <td width="50%"><img src="screenshots/13-report-browser.png" alt="Research report browser with a performance decision gate embedded in the console"></td>
-  </tr>
-  <tr>
-    <td><b>Strategy workspace.</b> Cadence, operating status, job evidence, and the latest strategy-specific report share one screen.</td>
-    <td><b>Research browser.</b> Backtests, diagnostics, valuation studies, and paper results remain separate artifacts but gain one consistent frame.</td>
-  </tr>
-</table>
 
 ### S&P 500 cross-sectional research
 
@@ -131,7 +202,17 @@ Missing inputs are omitted and disclosed instead of being converted to zero.
 
 ---
 
-## Design decisions worth defending
+## Product decisions that shaped the platform
+
+**A strategy is a lifecycle, not a script.** Research, paper trading,
+production, and dormant work are distinct states in the registry. Promotion
+requires an explicit evidence decision; a strong historical result cannot
+quietly acquire execution authority.
+
+**Data quality is a release gate.** Cross-source reconciliation, point-in-time
+membership, filing provenance, and missing-data coverage are checked before
+signal research. A pipeline with incomplete inputs reports degraded or fails;
+it does not publish a normal-looking ranking from a partial universe.
 
 **Silence is not health.** A strategy with no health-reporting job renders as
 *unmonitored* — never green. The most dangerous state in an automated system is
@@ -212,7 +293,7 @@ warning above the table because the ranking is misleading without it.
 
 ---
 
-## Technology
+## Platform architecture and technology
 
 | Layer | What I used |
 |---|---|
@@ -239,16 +320,18 @@ warning above the table because the ranking is misleading without it.
 | **Tradier** | Options chains, sandbox order routing | REST |
 | **yfinance** | Live quotes, 52-week ranges, market cap | Library |
 | **SEC EDGAR** | Filings and structured company facts | REST |
+| **Ollama / Qwen** | Private, no-per-query-cost interpretation over registered local research tools | Loopback service |
+| **DeepSeek** | Explicitly routed web research and long-form valuation analysis | REST |
 | **Anthropic API** | LLM interpretation layer over earnings signals — async, 10 concurrent | REST |
 | **Telegram Bot API** | Alert delivery | REST |
 | **Seeking Alpha / StockAnalysis** | Ratings diffs, supplemental fundamentals | Playwright + parsing |
 | **Wikipedia** | S&P 500 constituent anchor, pinned to a frozen revision | HTTP + parsing |
 | **NASDAQ / Federal Reserve** | Listings, risk-free rate | REST |
 
-Every vendor sits behind a single collector module, so a provider can be swapped
-without touching anything downstream. Cross-source reconciliation is a **blocking
-gate** before any signal research runs — treated as a release check, not a
-warning.
+Vendor-specific acquisition is isolated at collector and store boundaries;
+downstream strategy code consumes normalized models rather than provider
+payloads. Cross-source reconciliation is a **blocking gate** before signal
+research runs—treated as a release check, not a warning.
 
 ---
 
