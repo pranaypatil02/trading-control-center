@@ -1,8 +1,8 @@
 # Trading Control Center
 
 An operations console I designed and built for a personal quantitative trading
-system: **40 registered strategies, 61 health-reporting jobs, 160+ Python
-modules, 3,800+ tests, and one shared paper brokerage account.**
+system: **40 registered strategies, 72 health-reporting jobs, 180+ Python
+modules, 4,200+ tests, and one shared paper brokerage account.**
 
 This repository holds **screenshots and design notes only**. The implementation
 is private.
@@ -36,6 +36,24 @@ The console is the navigation and operating layer; the underlying strategy and
 research reports keep their own analytical depth. Embedded reports can be
 resized in place or opened standalone.
 
+### Grounded research and operational control
+
+<table>
+  <tr>
+    <td width="50%"><img src="screenshots/17-research-agent.png" alt="Read-only research agent returning four NVIDIA fiscal periods from local SEC evidence with filing links and completion time"></td>
+    <td width="50%"><img src="screenshots/18-job-observability.png" alt="Bots and Jobs observability view showing cadence-aware verdicts and recent-run reliability strips"></td>
+  </tr>
+  <tr>
+    <td><b>Evidence-grounded copilot.</b> Local Qwen handles open-ended questions, while bounded financial queries bypass the model and return parsed SEC facts with accession-level provenance. Paid web research is explicit, never a silent fallback; the entire surface is read-only.</td>
+    <td><b>Operational observability.</b> Each job is judged against its own observed cadence. Verdict, last run, normal rhythm, 90-day failure count, and a run-by-run reliability strip make intermittent and persistent failure visually distinct.</td>
+  </tr>
+</table>
+
+This is an authority decision as much as an AI feature: the agent can inspect
+registered tools and explain evidence, but it cannot place orders or change a
+strategy. Every response reports its route, source links, data dates,
+missingness, and elapsed time.
+
 ### Strategy operations and research
 
 <table>
@@ -64,6 +82,17 @@ resized in place or opened standalone.
 
 Both maps expose selectable axes, colour, bubble size, sector, and plot scope.
 Missing inputs are omitted and disclosed instead of being converted to zero.
+
+<table>
+  <tr>
+    <td width="50%"><img src="screenshots/19-sp500-ratio-maps.png" alt="S&P 500 price-to-earnings map with sibling price-to-sales and PEG views in the same workspace"></td>
+    <td width="50%"><img src="screenshots/20-drawdown-recovery.png" alt="S&P 500 drawdown and recovery research report showing coverage, return, volatility, and benchmark comparison"></td>
+  </tr>
+  <tr>
+    <td><b>Ratio-specific valuation.</b> Separate P/E, P/S, and PEG maps prevent one composite score from hiding why a stock looks cheap. Actual measures remain in tooltips and tables; the plot uses cross-sectional percentiles so unlike channels can share one visual grammar.</td>
+    <td><b>Drawdown and recovery.</b> Seven years of daily history become a searchable research surface for downside, time to recover, volatility, and benchmark-relative returns. Each stock is compared with the index over its own eligible dates.</td>
+  </tr>
+</table>
 
 
 
@@ -172,11 +201,11 @@ warning above the table because the ranking is misleading without it.
 | **Storage** | SQLite (WAL mode, async background writer, point-in-time snapshot tables) |
 | **Frontend** | HTML/CSS/SVG. No framework, no build step, no JS dependencies — pages open straight from disk. (Web fonts are the one external request.) |
 | **Charts** | SVG generated server-side; no charting library |
-| **Automation** | launchd (63 agents), GitHub Actions |
+| **Automation** | launchd (65 agents), GitHub Actions |
 | **Scraping** | Playwright (headless Chromium), lxml |
 | **ML** | LightGBM, scikit-learn — day-type classifier, benchmarked against a rules baseline |
 | **Security** | PBKDF2 + Fernet encrypted local credential vault; no secrets in source or logs |
-| **Testing** | pytest — 3,800+ tests, run as a release gate |
+| **Testing** | pytest — 4,200+ tests, run as a release gate |
 | **Validation** | pydantic |
 
 ### API and data integrations
