@@ -14,7 +14,8 @@ not the whole product.
 | Registered strategies and research studies | **40 across 7 families** |
 | Automated operations | **72 health-reporting jobs · 65 scheduled agents** |
 | Historical market data | **114.5M options minute bars · 6.6M daily-price rows** |
-| Code and verification | **180+ Python modules · 4,200+ tests** |
+| Codebase | **269K tracked Python lines · 194K implementation/research + 75K tests** |
+| Verification | **4,200+ tests across 250 test files** |
 | External systems | **12+ market-data, brokerage, filing, research, and alert integrations** |
 
 This repository holds **screenshots and design notes only**. The implementation
@@ -306,7 +307,7 @@ warning above the table because the ranking is misleading without it.
 | **Scraping** | Playwright (headless Chromium), lxml |
 | **ML** | LightGBM, scikit-learn — day-type classifier, benchmarked against a rules baseline |
 | **Security** | PBKDF2 + Fernet encrypted local credential vault; no secrets in source or logs |
-| **Testing** | pytest — 4,200+ tests, run as a release gate |
+| **Testing** | pytest — 75K lines across 250 test files; 4,200+ tests run as a release gate |
 | **Validation** | pydantic |
 
 ### API and data integrations
