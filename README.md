@@ -76,7 +76,7 @@ flowchart LR
 |---|---|
 | **Options and intraday** | 0DTE pullback systems, regime classification, IV snapshots, options-chain validation, paper order routing, and reconciliation. |
 | **Earnings and catalysts** | Pre-earnings opportunity scoring, post-earnings drift, earnings-movement scoring, filing ingestion, and estimate-revision research. |
-| **Momentum and mean reversion** | Directional momentum, quarterly momentum, monthly streaks, oversold snap, and combined technical/fundamental/momentum screens. |
+| **Momentum and mean reversion** | Directional momentum, quarterly momentum, monthly streaks, oversold snap, persistent reversal monitoring, and combined technical/fundamental/momentum screens. |
 | **Seasonality** | Monthly stock and options selection, rolling win-rate studies, tenure-constrained universes, and SPY-relative evaluation. |
 | **Fundamental and valuation** | Multi-method fair value, sector-relative P/E, P/S and PEG maps, undervaluation screens, quality pillars, and earnings forecasts. |
 | **Market behaviour** | Volatility distributions, annual ranges, drawdown/recovery, quarterly winners, and index-relative performance studies. |
@@ -185,6 +185,34 @@ Missing inputs are omitted and disclosed instead of being converted to zero.
     <td><b>Drawdown and recovery.</b> Seven years of daily history become a searchable research surface for downside, time to recover, volatility, and benchmark-relative returns. Each stock is compared with the index over its own eligible dates.</td>
   </tr>
 </table>
+
+### Case study — deterministic S&P 500 Reversal Watch
+
+![S&P 500 Reversal Watch](screenshots/21-reversal-watch.png)
+
+**Problem.** A list of stocks far below their highs identifies distress, but it
+does not distinguish continuing deterioration from an auditable reversal. A
+one-off screen also loses the history of why a company qualified, what changed,
+and whether an alert has already been reviewed.
+
+**Product decision.** I added a persistent post-close monitor with two separate
+deterministic models: a Beaten-Down Score establishes severity, then a Reversal
+Score evaluates price structure, momentum, volume, and SPY-relative strength.
+Confirmed and Strong states require evidence across all three categories, so a
+single RSI or moving-average event cannot claim confirmation. Every component,
+source bar, constituent snapshot, rejection, transition, suppression, and alert
+decision is stored for audit.
+
+**Operating design.** Shadow, paper, historical, and production states use
+separate databases. Historical scans cannot mutate live readiness or create an
+alert. Paper alerts remain as text in the Control Center until acknowledged;
+acknowledgment moves them to history without changing the underlying evidence.
+The scheduled job retries safely, fails below 90% universe coverage, and has no
+broker or order capability.
+
+**Current result.** The first paper scan evaluated **498 of 503 constituents
+(99.0%)**, explicitly rejected five incomplete/ineligible names, and created a
+searchable 56-stock watchlist with active, weakening, and promoted signals.
 
 
 
