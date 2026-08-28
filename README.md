@@ -203,16 +203,45 @@ single RSI or moving-average event cannot claim confirmation. Every component,
 source bar, constituent snapshot, rejection, transition, suppression, and alert
 decision is stored for audit.
 
-**Operating design.** Shadow, paper, historical, and production states use
-separate databases. Historical scans cannot mutate live readiness or create an
-alert. Paper alerts remain as text in the Control Center until acknowledged;
-acknowledgment moves them to history without changing the underlying evidence.
-The scheduled job retries safely, fails below 90% universe coverage, and has no
-broker or order capability.
+**Operating design.** Shadow, paper, and production states use separate
+databases. Historical execution fails closed until point-in-time membership and
+former-constituent prices can meet the coverage contract. Paper alerts remain
+as text in the Control Center until acknowledged; acknowledgment moves them to
+history without changing the underlying evidence. The scheduled job retries
+safely and fails below 90% universe coverage.
 
 **Current result.** The first paper scan evaluated **498 of 503 constituents
 (99.0%)**, explicitly rejected five incomplete/ineligible names, and created a
 searchable 56-stock watchlist with active, weakening, and promoted signals.
+
+### Case study — from signal monitor to measurable paper strategy
+
+![Reversal Watch paper portfolio](screenshots/22-reversal-paper-portfolio.png)
+
+**Problem.** A high-quality alert still does not answer whether the strategy is
+investable. Measuring close-to-close returns would overstate execution because
+the signal only exists after the close, while an unstructured “sell when it
+looks right” rule would make the result impossible to falsify.
+
+**Product decision.** I added an isolated $25,000 forward account that converts
+Confirmed and Strong reversals into fixed $1,000 positions. The opportunity
+count is variable, so unused capital remains cash rather than being forced into
+weaker names. Decisions made after a completed close fill only at a later open,
+with fractional shares and 5 bp slippage. SPY begins at the same executable
+open, giving the strategy one honest price-only benchmark.
+
+**Risk and lifecycle design.** Exits are deterministic: signal weakening,
+archive, a 12% hard stop, a 10% trailing stop after a 10% gain, a 25% profit
+target, or a fresh reliable valuation/fundamental avoid signal. Stale, future,
+incomplete, or low-confidence valuation data cannot force a trade. A sold stock
+needs a new positive signal before re-entry, missing required prices roll back
+the whole session, and a missed market day blocks advancement instead of
+silently moving the fill to a more convenient open.
+
+**Execution boundary.** The account is a local simulator with no brokerage
+client, credentials, or external-order path. Its first decision is visible as a
+pending order rather than a fabricated historical fill, so the evidence starts
+prospectively from activation.
 
 
 
