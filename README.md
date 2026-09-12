@@ -21,6 +21,20 @@ not the whole product.
 This repository holds **screenshots and design notes only**. The implementation
 is private.
 
+## Try the interactive product demo
+
+[**Open the high-fidelity Control Center demo →**](https://pranaypatil02.github.io/trading-control-center/)
+
+The demo is a purpose-built, read-only showcase with synthetic data. It mirrors
+the current product's information architecture and interaction model without
+publishing strategy code, live positions, account values, credentials, or
+private infrastructure details. Use the left navigation, global search, job
+filters, chart ranges, and interactive market-breadth tiles.
+
+[![Latest sanitized Platform Dashboard](screenshots/23-platform-dashboard-latest.png)](https://pranaypatil02.github.io/trading-control-center/)
+
+Click the screenshot to open the interactive version.
+
 ---
 
 ## The product problem
@@ -261,6 +275,26 @@ prospectively from activation.
 ---
 
 ## Product decisions that shaped the platform
+
+### A public demo must preserve the product, not the private data
+
+**Problem.** Static screenshots explained individual features but did not show
+how the operator moves from a portfolio verdict to an incident, strategy,
+research artifact, or market-breadth view. Publishing the production page would
+also expose trading data and implementation details that do not belong in a
+public portfolio.
+
+**Product decision.** I built a dependency-free interactive facsimile of the
+current Control Center. It preserves the navigation hierarchy, exception-first
+workflow, cadence-aware health filters, evidence boundaries, responsive layout,
+and market-breadth interaction while using an intentionally synthetic data
+model. The static screenshot is generated from this same artifact, preventing
+the click-through and the portfolio image from describing different products.
+
+**Guardrail.** The banner makes the boundary persistent: synthetic data,
+read-only, and no brokerage connection. The public artifact contains no private
+source, API request, secret, local path, account identifier, live position, or
+order control.
 
 **A strategy is a lifecycle, not a script.** Research, paper trading,
 production, and dormant work are distinct states in the registry. Promotion

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive, sanitized product demo of the Trading Control Center.">
+  <title>Trading Control Center — Interactive Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="demo-banner" role="note">
+    <span class="demo-dot" aria-hidden="true"></span>
+    Public product demo
+    <span class="demo-copy">Synthetic data · read-only · no brokerage connection</span>
+  </div>
+
+  <div class="shell">
+    <aside class="sidebar" aria-label="Control Center navigation">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span><strong>Control Center</strong><small>Trading operations</small></span>
+      </div>
+
+      <label class="search">
+        <span aria-hidden="true">⌕</span>
+        <input id="global-search" type="search" placeholder="Find anything" autocomplete="off">
+        <kbd>⌘ K</kbd>
+      </label>
+      <div id="search-results" class="search-results" hidden></div>
+
+      <nav id="primary-nav">
+        <p class="nav-label">Today</p>
+        <button class="nav-item active" data-view="dashboard"><span class="nav-icon">◫</span><span>Platform Dashboard</span></button>
+        <button class="nav-item" data-view="seasonality"><span class="nav-icon">◌</span><span>Seasonality board</span><b>29</b></button>
+        <button class="nav-item" data-view="analyzer"><span class="nav-icon">⌁</span><span>Stock analyzer</span><b>500</b></button>
+        <button class="nav-item" data-view="agent"><span class="nav-icon">✦</span><span>Research agent</span><b>read only</b></button>
+
+        <p class="nav-label">Running</p>
+        <button class="nav-item" data-view="strategies"><span class="nav-icon">◇</span><span>Strategies</span><i class="alert-dot"></i><b>40</b></button>
+        <button class="nav-item" data-view="jobs"><span class="nav-icon">↻</span><span>Bots &amp; jobs</span><i class="alert-dot"></i><b>72</b></button>
+        <button class="nav-item" data-view="health"><span class="nav-icon">△</span><span>Alerts &amp; health</span><b>3</b></button>
+
+        <p class="nav-label">Review</p>
+        <button class="nav-item" data-view="performance"><span class="nav-icon">↗</span><span>Book performance</span></button>
+        <button class="nav-item" data-view="reports"><span class="nav-icon">▤</span><span>Reports &amp; research</span><b>39</b></button>
+        <button class="nav-item" data-view="matrix"><span class="nav-icon">▦</span><span>Market breadth</span><b>new</b></button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="health-pulse"></span>
+        <span><strong>Read-only showcase</strong><small>Last demo refresh · today</small></span>
+      </div>
+    </aside>
+
+    <main id="main" tabindex="-1">
+      <header class="topbar">
+        <button class="mobile-nav" id="mobile-nav" aria-label="Open navigation" aria-expanded="false">☰</button>
+        <div>
+          <p class="eyebrow" id="page-eyebrow">Operating view · synthetic snapshot</p>
+          <h1 id="page-title">What to look at today</h1>
+        </div>
+        <div class="top-actions">
+          <button class="ghost-button" id="refresh-button"><span aria-hidden="true">↻</span> Refresh demo</button>
+          <span class="as-of"><i></i><span><small>System state</small><strong>Demo healthy</strong></span></span>
+        </div>
+      </header>
+
+      <section id="view-root" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
