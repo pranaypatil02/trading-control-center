@@ -7,6 +7,7 @@ const views = {
   jobs: { title: "Bots & jobs", eyebrow: "Cadence-aware observability · synthetic runs", render: renderJobs },
   health: { title: "Alerts & health", eyebrow: "Exceptions first · synthetic incidents", render: renderJobs },
   performance: { title: "Book performance", eyebrow: "Execution and attribution · synthetic P&L", render: renderPerformance },
+  accounts: { title: "Simulated accounts", eyebrow: "Comparable forward evidence · synthetic data", render: renderAccounts },
   reports: { title: "Reports & research", eyebrow: "Registered artifacts · public demo", render: renderReports },
   matrix: { title: "Market breadth", eyebrow: "Completed session · synthetic market data", render: renderMatrix },
 };
@@ -38,6 +39,17 @@ const strategies = [
   ["Fundamental inflection", "Research", "Point-in-time change detector over normalized filing and estimate history.", "Research"],
   ["Quality & value", "Research", "Cross-sectional scorecard with missingness disclosed rather than imputed.", "Research"],
 ];
+
+const simulatedAccounts = [
+  { key: "reversal", name: "Persistent reversal", rules: "Rule complete", sessions: 17, ret: "+1.6%", spy: "+0.8%", excess: "+0.8%", tone: "positive", entry: "Enter after a confirmed reversal at the next executable open.", exit: "Exit on invalidation, risk threshold, trailing protection, target, or valuation veto." },
+  { key: "quality", name: "Quality & value", rules: "Missing exit", sessions: 9, ret: "+2.1%", spy: "+1.4%", excess: "+0.7%", tone: "positive", entry: "Buy the stored top-five screen at the next completed session's open.", exit: "Not defined" },
+  { key: "fundamental", name: "Fundamental strength", rules: "Missing exit", sessions: 9, ret: "+0.9%", spy: "+1.4%", excess: "−0.5%", tone: "negative", entry: "Buy the stored top-five screen at the next completed session's open.", exit: "Not defined" },
+  { key: "seasonal", name: "Seasonal strength", rules: "Missing exit", sessions: 5, ret: "+1.3%", spy: "+0.4%", excess: "+0.9%", tone: "positive", entry: "Buy the stored candidate slate at the next completed session's open.", exit: "Not defined" },
+  { key: "valuation", name: "Conservative valuation", rules: "Missing exit", sessions: 9, ret: "−0.4%", spy: "+1.4%", excess: "−1.8%", tone: "negative", entry: "Buy the stored top-five valuation screen at the next completed session's open.", exit: "Not defined" },
+  { key: "preview", name: "Next-period preview", rules: "Missing entry + exit", sessions: 0, ret: "—", spy: "—", excess: "—", tone: "", entry: "Not defined", exit: "Not defined" },
+];
+
+let selectedAccount = null;
 
 function shell(title, description, body, meta = "Interactive public demo") {
   return `<div class="surface-head"><div><h2>${title}</h2><p>${description}</p></div><span class="meta-pill">${meta}</span></div>${body}`;
@@ -149,6 +161,34 @@ function renderPerformance() {
   return shell("Paper-book performance", "Synthetic execution outcomes are separated from idealized fills so strategy selection and execution quality cannot be confused.", `<section class="panel"><div class="panel-head"><div><h2>Realized versus benchmark fills</h2><p>Same synthetic decisions, different execution assumptions.</p></div><span class="status healthy">Ahead</span></div><div class="panel-body"><div class="chart-wrap">${chartSvg()}</div></div></section>`, "Synthetic values · paper only");
 }
 
+function renderAccounts() {
+  if (selectedAccount) return renderAccountDetail(selectedAccount);
+  return shell("Comparable strategy accounts", "Each strategy gets a separate hypothetical $25,000 account. A strategy must have explicit entry and exit rules plus a common 20-session window before it can be ranked.", `
+    <div class="account-callout"><strong>No winner yet</strong><span>No rule-complete account has a full 20-session comparison window. Short histories and proxy exits remain visible, but cannot win.</span></div>
+    <section class="panel account-panel"><div class="panel-head"><div><h2>All accounts</h2><p>Select a strategy for its rules, period returns, curve, and holdings.</p></div><span class="meta-pill">Synthetic $25,000 books</span></div>
+      <div class="account-table-wrap"><table class="jobs-table account-table"><thead><tr><th>Strategy</th><th>Rule status</th><th>Sessions</th><th>Return</th><th>SPY</th><th>Excess</th></tr></thead><tbody>
+      ${simulatedAccounts.map(a => `<tr><td><button class="account-link" data-account="${a.key}">${a.name}<span>Open performance →</span></button></td><td><span class="rule-state ${a.rules === "Rule complete" ? "complete" : "missing"}">${a.rules}</span></td><td>${a.sessions}</td><td class="${a.tone}">${a.ret}</td><td>${a.spy}</td><td class="${a.tone}">${a.excess}</td></tr>`).join("")}
+      </tbody></table></div></section>
+    <section class="panel rule-backlog"><div class="panel-head"><div><h2>Rules needing definition</h2><p>These gaps block comparison; the product does not invent strategy logic.</p></div><span class="status failing">5 exits · 1 entry</span></div><div class="panel-body"><div class="backlog-grid"><article><strong>Five research screens</strong><p>Entry is observable from stored selections. Exit criteria are not authored, so roster removal is an experimental proxy only.</p></article><article><strong>One preview screen</strong><p>Neither entry date nor exit rule exists. No account starts until both are defined.</p></article><article><strong>Ranking contract</strong><p>Complete rules, 20 comparable sessions, same starting capital, and the same SPY window.</p></article></div></div></section>
+  `, "Synthetic evidence · no brokerage connection");
+}
+
+function renderAccountDetail(key) {
+  const account = simulatedAccounts.find(a => a.key === key) || simulatedAccounts[0];
+  const ready = account.rules === "Rule complete";
+  return `<button class="detail-back" data-account-back>← Back to all simulated accounts</button>
+    ${shell(account.name, "A separate strategy record keeps rules, evidence, and performance together instead of hiding them in one aggregate table.", `
+      <div class="account-callout ${ready ? "ready" : ""}"><strong>${account.rules}</strong><span>${ready ? "Explicit rules are present; the account still needs a full 20-session window before ranking." : "This account is visible for observation but excluded from the comparison leaderboard."}</span></div>
+      <div class="metric-grid"><article class="metric-card"><span class="label">Starting capital</span><div class="value">$25,000</div><p>Fixed synthetic book</p></article><article class="metric-card"><span class="label">Marked sessions</span><div class="value">${account.sessions}</div><p>Completed closes only</p></article><article class="metric-card"><span class="label">Since activation</span><div class="value ${account.tone}">${account.ret}</div><p>Not annualized</p></article><article class="metric-card"><span class="label">Excess vs SPY</span><div class="value ${account.tone}">${account.excess}</div><p>Same activation window</p></article></div>
+      <div class="account-detail-grid"><section class="panel"><div class="panel-head"><div><h2>Performance over time</h2><p>Solid: strategy account · dashed: SPY.</p></div></div><div class="panel-body"><div class="chart-wrap">${accountChartSvg(account.tone === "negative")}</div></div></section><section class="panel"><div class="panel-head"><div><h2>Strategy contract</h2><p>Missing rules are shown, not inferred.</p></div></div><div class="panel-body account-rules"><span class="label">Entry criterion</span><p>${account.entry}</p><span class="label">Exit criterion</span><p class="${account.exit === "Not defined" ? "missing-copy" : ""}">${account.exit}</p></div></section></div>
+    `, "Synthetic strategy detail")}`;
+}
+
+function accountChartSvg(negative) {
+  const line = negative ? "M48 158 L130 145 L212 154 L294 132 L376 143 L458 151 L540 139 L622 148 L718 142" : "M48 158 L130 149 L212 151 L294 131 L376 136 L458 117 L540 122 L622 101 L718 92";
+  return `<svg class="chart-svg" viewBox="0 0 760 220" role="img" aria-label="Synthetic strategy account and SPY equity curves"><g class="chart-grid"><line x1="46" x2="742" y1="30" y2="30"/><line x1="46" x2="742" y1="78" y2="78"/><line x1="46" x2="742" y1="126" y2="126"/><line x1="46" x2="742" y1="174" y2="174"/></g><g><text x="3" y="33">$26k</text><text x="3" y="129">$25k</text><text x="3" y="177">$24k</text></g><path class="chart-benchmark" d="M48 158 L130 154 L212 146 L294 140 L376 134 L458 128 L540 121 L622 116 L718 110"/><path class="chart-line" d="${line}"/><circle class="chart-point" cx="718" cy="${negative ? 142 : 92}" r="4"/></svg>`;
+}
+
 function renderReports() {
   const reports = [["Decision evidence summary","Operations","Refreshed today"],["Market breadth matrix","Market research","Refreshed today"],["Strategy scorecard","Platform","Refreshed 2h ago"],["Execution attribution","Portfolio","Refreshed today"],["Data freshness audit","Data foundation","Refreshed 18m ago"],["Seasonal evidence board","Seasonality","Past cadence"]];
   return shell("Registered research artifacts", "One discovery layer over immutable reports. Freshness and ownership travel with every artifact.", `<div class="report-grid">${reports.map(r => `<article class="report-card"><div class="card-top"><h3>${r[0]}</h3><span class="tag">HTML</span></div><p class="card-copy">${r[1]} · registered read-only artifact with an explicit refresh cadence.</p><div class="card-meta"><span>${r[2]}</span><strong>Open →</strong></div></article>`).join("")}</div>`);
@@ -173,6 +213,19 @@ function bindViewEvents(name) {
   }));
   document.querySelectorAll("[data-open-jobs]").forEach(button => button.addEventListener("click", () => setView("jobs")));
   document.querySelectorAll(".chart-range button").forEach(button => button.addEventListener("click", () => showToast(`${button.textContent} synthetic window selected`)));
+
+  if (name === "accounts") {
+    document.querySelectorAll("[data-account]").forEach(button => button.addEventListener("click", () => {
+      selectedAccount = button.dataset.account;
+      setView("accounts", false);
+      window.scrollTo(0, 0);
+    }));
+    document.querySelector("[data-account-back]")?.addEventListener("click", () => {
+      selectedAccount = null;
+      setView("accounts", false);
+      window.scrollTo(0, 0);
+    });
+  }
 
   if (name === "jobs" || name === "health") {
     let filter = "all";

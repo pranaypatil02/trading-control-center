@@ -257,6 +257,27 @@ client, credentials, or external-order path. Its first decision is visible as a
 pending order rather than a fabricated historical fill, so the evidence starts
 prospectively from activation.
 
+### Case study — comparable $25,000 strategy accounts
+
+**Problem.** Screen outputs and paper strategies appeared beside one another,
+but only broker-connected sleeves had measurable outcomes. A short-lived screen
+could also look like the “best” strategy simply because its observation window
+was favorable, while missing exits were easy to mistake for intentional rules.
+
+**Product decision.** I added one hypothetical $25,000 account per eligible
+strategy, with a separate clickable detail page for its rules, period returns,
+SPY comparison, equity curve, holdings, and fills. The rollup compares excess
+return only over a common 20-session window rather than ranking incompatible
+since-start results.
+
+**Guardrails.** Entry and exit criteria are audited explicitly. Accounts using
+an experimental proxy exit remain visible for learning but cannot enter the
+leaderboard; a strategy with neither rule does not start. The accounts are
+forward observations of stored decisions, not paper fills or hindsight
+backtests, and no brokerage path is present.
+
+[**Open the clickable simulated-account demo →**](https://pranaypatil02.github.io/trading-control-center/#accounts)
+
 
 
 ### Retrieval and operational freshness
