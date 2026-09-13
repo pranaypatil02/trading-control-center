@@ -155,6 +155,30 @@ spend API credits.
 change a strategy. A response that does not inspect evidence is discarded
 instead of being presented as financial research.
 
+### Case study — evidence-bound equity theses
+
+![Evidence-bound equity thesis](screenshots/24-equity-thesis.png)
+
+**Problem.** Standalone valuation, quality, forecast, peer, and market-behavior
+reports made the evidence hard to reconcile. A long-form thesis could also look
+more certain than its inputs—especially when vendor prices were stale, analyst
+coverage was thin, or a valuation method was unsupported.
+
+**Product decision.** I composed the existing deterministic research outputs
+into a dated, immutable company thesis with an explicit verdict, bear/base/bull
+range, method spread, and both supporting and contrary evidence. A library in
+the Control Center makes every published thesis discoverable from the same
+strategy and research workflows used to operate the rest of the platform.
+
+**Guardrail.** The report identifies the price and date used, surfaces source
+price discrepancies, and carries missing or weak evidence into the conclusion.
+Unsupported methods are omitted rather than approximated, and model-written
+interpretation cannot replace computed values.
+
+**Outcome.** Operators get a comparable decision record—cheap, fair,
+expensive, or unresolved—instead of a bullish narrative assembled from
+whichever inputs happened to be available.
+
 ### Case study — observability for 72 automated jobs
 
 ![Job observability](screenshots/18-job-observability.png)
