@@ -147,12 +147,17 @@ full fiscal year, or admit when evidence was missing.
 tools and a local SEC filing corpus. In the example above, “Show me NVIDIA's
 last 4 earnings” is answered by a deterministic financial-data path—not model
 memory—with filing dates, period scope, accession links, missingness, and
-completion time. Local Qwen handles interpretation; DeepSeek is reserved for an
-explicitly selected web-research route, so a vague question cannot silently
-spend API credits.
+completion time. Local Qwen handles interpretation; DeepSeek V4.1 Flash is
+reserved for an explicitly selected hosted-search route, so a vague question
+cannot silently spend API credits. The web route uses DeepSeek's
+Anthropic-compatible Messages contract because its Responses compatibility
+endpoint does not execute hosted tools.
 
 **Guardrail.** The agent can inspect and explain, but it cannot place orders or
-change a strategy. A response that does not inspect evidence is discarded
+change a strategy. A web response is accepted only when the provider returns a
+structured hosted-search call/result; model-written URLs cannot authorize their
+own claims. Primary filings and investor-relations sources are preferred,
+Yahoo is prohibited, and a response that does not inspect evidence is discarded
 instead of being presented as financial research.
 
 ### Case study — evidence-bound equity theses
@@ -174,14 +179,16 @@ discoverable from the same workflow used to inspect the company.
 
 **Guardrail.** The report identifies the price and date used, surfaces source
 price discrepancies, and carries missing or weak evidence into the conclusion.
-Each detailed run refreshes the issuer's public SEC filings, grounds research
-claims in dated filing excerpts, links the source, and rejects prose whose
-citations or figures cannot be validated. Forward estimates two years out or
-later need at least five analysts. The model's valuation is visibly separate
-and labelled as calculation-unverified; it cannot replace or silently alter the
-deterministic value. Sector, debt, and the company-specific growth metric remain
-explicit: financial-company debt is not read like industrial leverage, and
-AFFO/FFO is not silently replaced with EPS.
+Each detailed run refreshes the issuer's public SEC filings, then uses DeepSeek
+V4.1 Flash hosted search for the latest earnings release, presentation, and
+other public evidence. It grounds research claims in dated sources, links each
+source, and rejects prose whose citations or figures cannot be validated. The
+run fails closed when hosted search is absent or incomplete. Forward estimates
+two years out or later need at least five analysts. The model's valuation is
+visibly separate and labelled as calculation-unverified; it cannot replace or
+silently alter the deterministic value. Sector, debt, and the company-specific
+growth metric remain explicit: financial-company debt is not read like
+industrial leverage, and AFFO/FFO is not silently replaced with EPS.
 
 **Outcome.** The first review cohort covers market-cap ranks 1–50 in a stable,
 auditable order. Operators get a comparable decision record—cheap, fair,
@@ -469,7 +476,7 @@ warning above the table because the ranking is misleading without it.
 | **yfinance** | Live quotes, 52-week ranges, market cap | Library |
 | **SEC EDGAR** | Filings and structured company facts | REST |
 | **Ollama / Qwen** | Private, no-per-query-cost interpretation over registered local research tools | Loopback service |
-| **DeepSeek** | Explicitly routed web research and long-form valuation analysis | REST |
+| **DeepSeek V4.1 Flash** | Explicitly routed hosted web research and long-form valuation analysis | Anthropic-compatible Messages API |
 | **Anthropic API** | LLM interpretation layer over earnings signals — async, 10 concurrent | REST |
 | **Telegram Bot API** | Alert delivery | REST |
 | **Seeking Alpha / StockAnalysis** | Ratings diffs, supplemental fundamentals | Playwright + parsing |
