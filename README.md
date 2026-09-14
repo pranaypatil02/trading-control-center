@@ -166,18 +166,23 @@ coverage was thin, or a valuation method was unsupported.
 
 **Product decision.** I composed the existing deterministic research outputs
 into a dated, immutable company thesis with an explicit verdict, bear/base/bull
-range, method spread, and both supporting and contrary evidence. A library in
-the Control Center makes every published thesis discoverable from the same
-strategy and research workflows used to operate the rest of the platform.
+range, method spread, and both supporting and contrary evidence. Coverage now
+advances in market-cap order as two 25-stock slices, then stops after each
+50-stock cohort for review before the next cohort is authorized. A library and
+the stock-detail views in the Control Center make every published thesis
+discoverable from the same workflow used to inspect the company.
 
 **Guardrail.** The report identifies the price and date used, surfaces source
 price discrepancies, and carries missing or weak evidence into the conclusion.
 Unsupported methods are omitted rather than approximated, and model-written
-interpretation cannot replace computed values.
+interpretation cannot replace computed values. Sector, debt, and the
+company-specific growth metric are explicit: financial-company debt is not
+read like industrial leverage, and AFFO/FFO is not silently replaced with EPS.
 
-**Outcome.** Operators get a comparable decision record—cheap, fair,
-expensive, or unresolved—instead of a bullish narrative assembled from
-whichever inputs happened to be available.
+**Outcome.** The first review cohort covers market-cap ranks 1–50 in a stable,
+auditable order. Operators get a comparable decision record—cheap, fair,
+expensive, unresolved, or not assessable—without a batch silently continuing
+past the human review point or filling evidence gaps with invented values.
 
 ### Case study — observability for 72 automated jobs
 
