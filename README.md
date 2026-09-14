@@ -174,15 +174,21 @@ discoverable from the same workflow used to inspect the company.
 
 **Guardrail.** The report identifies the price and date used, surfaces source
 price discrepancies, and carries missing or weak evidence into the conclusion.
-Unsupported methods are omitted rather than approximated, and model-written
-interpretation cannot replace computed values. Sector, debt, and the
-company-specific growth metric are explicit: financial-company debt is not
-read like industrial leverage, and AFFO/FFO is not silently replaced with EPS.
+Each detailed run refreshes the issuer's public SEC filings, grounds research
+claims in dated filing excerpts, links the source, and rejects prose whose
+citations or figures cannot be validated. Forward estimates two years out or
+later need at least five analysts. The model's valuation is visibly separate
+and labelled as calculation-unverified; it cannot replace or silently alter the
+deterministic value. Sector, debt, and the company-specific growth metric remain
+explicit: financial-company debt is not read like industrial leverage, and
+AFFO/FFO is not silently replaced with EPS.
 
 **Outcome.** The first review cohort covers market-cap ranks 1–50 in a stable,
 auditable order. Operators get a comparable decision record—cheap, fair,
-expensive, unresolved, or not assessable—without a batch silently continuing
-past the human review point or filling evidence gaps with invented values.
+expensive, unresolved, or not assessable—plus a public-evidence trail showing
+what survived validation and how many model paragraphs were discarded. A batch
+cannot silently continue past the human review point or fill evidence gaps with
+invented values.
 
 ### Case study — observability for 72 automated jobs
 
