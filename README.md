@@ -153,6 +153,12 @@ cannot silently spend API credits. The web route uses DeepSeek's
 Anthropic-compatible Messages contract because its Responses compatibility
 endpoint does not execute hosted tools.
 
+Every completed DeepSeek answer shows its estimated USD charge and the day's
+recorded total. The estimate uses the provider's cache-hit, cache-miss, and
+output-token counts against the published peak/off-peak rates; if the provider
+omits the cache split, all input is priced as a cache miss and labelled as an
+upper bound rather than understating spend.
+
 **Guardrail.** The agent can inspect and explain, but it cannot place orders or
 change a strategy. A web response is accepted only when the provider returns a
 structured hosted-search call/result; model-written URLs cannot authorize their
