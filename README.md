@@ -149,12 +149,12 @@ salted verifier; successful access receives a short-lived, HTTP-only session.
 The report can be hidden manually and automatically locks after 15 minutes or
 when the service restarts.
 
-**Guardrail.** Missing or damaged password configuration fails closed: the
-screen above is returned without reading the portfolio report. Failed attempts
-are rate-limited, the session is same-site, and the same unlock boundary covers
-viewing, uploads, and deletes. Generated reports and account data remain local
-and excluded from version control; this showcase contains no holdings or
-account values.
+**Guardrail.** Missing password configuration fails closed: a setup screen is
+returned without reading the portfolio report. Malformed configuration stops
+the service rather than weakening access. Failed attempts are rate-limited, the
+session is same-site, and the same unlock boundary covers viewing, uploads, and
+deletes. Generated reports and account data remain local and excluded from
+version control; this showcase contains no holdings or account values.
 
 **Outcome.** The product can still expose public, synthetic research surfaces
 while private portfolio figures remain unavailable to unauthenticated viewers.
