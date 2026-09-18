@@ -135,6 +135,30 @@ The registry distinguishes research studies, paper strategies, production
 systems, and dormant work. A promising backtest does not silently become a bot;
 promotion is an explicit product decision with evidence attached.
 
+### Case study — portfolio privacy at the report boundary
+
+![Fail-closed portfolio privacy screen](screenshots/25-portfolio-privacy-lock.jpg)
+
+**Problem.** A visual blur would hide balances from a casual glance but leave
+the real values in the downloaded HTML and browser source. It also would not
+protect portfolio upload and deletion actions.
+
+**Product decision.** Portfolio report bytes are withheld by the local Control
+Center server until a password is verified. The password is stored only as a
+salted verifier; successful access receives a short-lived, HTTP-only session.
+The report can be hidden manually and automatically locks after 15 minutes or
+when the service restarts.
+
+**Guardrail.** Missing or damaged password configuration fails closed: the
+screen above is returned without reading the portfolio report. Failed attempts
+are rate-limited, the session is same-site, and the same unlock boundary covers
+viewing, uploads, and deletes. Generated reports and account data remain local
+and excluded from version control; this showcase contains no holdings or
+account values.
+
+**Outcome.** The product can still expose public, synthetic research surfaces
+while private portfolio figures remain unavailable to unauthenticated viewers.
+
 ### Case study — evidence-grounded research agent
 
 ![Read-only research agent](screenshots/17-research-agent.png)
