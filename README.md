@@ -352,6 +352,34 @@ backtests, and no brokerage path is present.
 
 
 
+### Case study — research evidence before strategy promotion
+
+![Strategy research evidence — synthetic demonstration](screenshots/26-strategy-research-evidence.png)
+
+**Problem.** A growing strategy catalogue mixed reference tools, observed pick
+lists, simulated portfolios and broker-paper outcomes. Putting every row on a
+leaderboard would make incomparable or incomplete evidence look actionable.
+
+**Product decision.** Give every system an explicit role and readiness state.
+Separate execution bases, show why a result is unranked, and preserve monthly
+observations alongside experiment history. A missing return remains missing;
+realized trade profit is not presented as total account return.
+
+**Guardrails.** Producer-time snapshots preserve what was available before an
+entry. Corrections append instead of replacing history. Experiments declare
+candidates and validation windows before execution; failed and blocked results
+remain visible. Changing a strategy requires a separately authenticated human
+decision tied to the exact rules and evidence. The conversational agent can
+read evidence but cannot approve a change.
+
+**Outcome.** The first release connects local source evidence, a research
+report and an isolated approval-controlled simulation. Data-quality gates
+currently prevent historical results from becoming validated replacements.
+Deployment into existing broker strategies and automatic weekly hypothesis
+generation remain outside this release. The screenshot uses entirely
+synthetic names and figures; it is a workflow demonstration, not a performance
+claim.
+
 ### Retrieval and operational freshness
 
 <table>
