@@ -360,10 +360,11 @@ backtests, and no brokerage path is present.
 lists, simulated portfolios and broker-paper outcomes. Putting every row on a
 leaderboard would make incomparable or incomplete evidence look actionable.
 
-**Product decision.** Give every system an explicit role and readiness state.
-Separate execution bases, show why a result is unranked, and preserve monthly
-observations alongside experiment history. A missing return remains missing;
-realized trade profit is not presented as total account return.
+**Product decision.** Give every registered strategy one plain verdict and one
+capital disposition. The page leads with working, failed, unproven and blocked
+counts, then explains the evidence window and next action for every row.
+Execution bases remain separate, a missing return stays missing, and realized
+trade profit is never presented as total account return.
 
 **Guardrails.** Producer-time snapshots preserve what was available before an
 entry. Corrections append instead of replacing history. Experiments declare
@@ -372,13 +373,14 @@ remain visible. Changing a strategy requires a separately authenticated human
 decision tied to the exact rules and evidence. The conversational agent can
 read evidence but cannot approve a change.
 
-**Outcome.** The first release connects local source evidence, a research
-report and an isolated approval-controlled simulation. Data-quality gates
-currently prevent historical results from becoming validated replacements.
-Deployment into existing broker strategies and automatic weekly hypothesis
-generation remain outside this release. The screenshot uses entirely
-synthetic names and figures; it is a workflow demonstration, not a performance
-claim.
+**Outcome.** Every registered strategy now appears exactly once in the decision
+table and exactly once in the simulated-money coverage table. Existing
+forward engines and isolated paper ledgers are imported into the same view;
+strategies without complete entry, exit, sizing, cost or availability rules are
+named as blockers instead of receiving invented capital. Scheduled jobs append
+marks over time and preserve corrections as revisions. The screenshot uses
+entirely synthetic names and figures; it demonstrates the workflow rather than
+making a performance claim.
 
 ### Retrieval and operational freshness
 
