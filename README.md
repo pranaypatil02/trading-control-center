@@ -272,6 +272,41 @@ Missing inputs are omitted and disclosed instead of being converted to zero.
   </tr>
 </table>
 
+### Case study — monthly momentum without a black-box score
+
+<table>
+  <tr>
+    <td width="50%"><img src="screenshots/27-monthly-direction-history.png" alt="Ten-year monthly direction history for a selected S&P 500 company"></td>
+    <td width="50%"><img src="screenshots/28-current-year-monthly-leaders.png" alt="Current-year S&P 500 monthly leaders ranked by positive months and return"></td>
+  </tr>
+</table>
+
+**Problem.** A conventional momentum score says which company ranks higher but
+hides the path. Two stocks can finish with the same return after very different
+sequences: one advanced steadily, while the other relied on a single jump and
+then reversed. Reviewing hundreds of separate price charts made that pattern
+slow to compare and easy to remember selectively.
+
+**Product decision.** I added two linked S&P 500 research screens. The company
+view shows each calendar month as up, down, flat, missing, or pending across the
+last ten available years, with annual counts and consecutive-month streaks. The
+leadership view ranks the current year by completed positive-month count, then
+by adjusted-price return from the prior December close. Future months remain
+visibly pending and fill automatically after their official month-end close.
+
+**Guardrails.** January always compares with the prior December close. Companies
+without every completed current-year month stay visible but cannot outrank a
+fully covered company. Publication fails below 90% complete-universe coverage.
+The screen uses today&rsquo;s constituents, so historical rows explicitly disclose
+current-membership survivorship bias and are not presented as a historical
+index backtest.
+
+**Outcome.** One screen answers who has led consistently this year; the other
+shows whether that behavior is persistent or unusual for the company. The first
+production run covered 501 of 503 current constituents completely through nine
+months, while two recent additions remained visible as partial records rather
+than receiving misleading ranks.
+
 ### Case study — deterministic S&P 500 Reversal Watch
 
 ![S&P 500 Reversal Watch](screenshots/21-reversal-watch.png)
