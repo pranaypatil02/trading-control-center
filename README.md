@@ -307,6 +307,36 @@ production run covered 501 of 503 current constituents completely through nine
 months, while two recent additions remained visible as partial records rather
 than receiving misleading ranks.
 
+### Case study — testing annual winner and loser persistence without survivor bias
+
+![Annual S&P 500 winners versus losers backtest](screenshots/29-annual-winners-vs-losers.png)
+
+**Problem.** “Buy last year&rsquo;s 50 worst stocks” and “stay with last year&rsquo;s
+50 winners” are simple rules, but a current-constituent backtest removes failed
+companies and adds later winners before they were eligible. Missing delisted
+names can improve the result again if the engine quietly substitutes rank 51.
+Testing only the best-looking cohort size creates a third bias.
+
+**Product decision.** I added one point-in-time study that evaluates both
+hypotheses at 10, 25, and 50 stocks over ten completed holding years. All six
+variants use the same adjusted-close convention and same-year SPY benchmark.
+The page leads with a verdict, keeps every annual result visible, and lets the
+reader inspect the exact ranked holdings and formation return behind any cell.
+
+**Guardrails.** Membership is reconstructed at each formation year-end and
+includes former constituents. Cohorts are fixed before holding-period data is
+checked: an unavailable selection remains cash and never pulls in rank 11, 26,
+or 51. Early delistings use the last observed adjusted price and then cash.
+Incomplete current years are excluded, coverage fails closed below 400
+rankable members, and “Supported” uses a Bonferroni-corrected sign-test threshold
+across the six requested variants. Costs and taxes are disclosed as excluded.
+
+**Outcome.** The contrarian loser rule was not supported at any size: CAGR was
+7.0–9.0% versus SPY&rsquo;s 12.9%. Prior-year winners were stronger, led by the
+10-stock cohort at 21.9% CAGR and 8 wins in 10 years, but its exact sign test was
+`p=0.109`; the product therefore labels it **Promising, unproven** rather than
+turning the best historical line into a deployable strategy.
+
 ### Case study — deterministic S&P 500 Reversal Watch
 
 ![S&P 500 Reversal Watch](screenshots/21-reversal-watch.png)
