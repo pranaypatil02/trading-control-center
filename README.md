@@ -365,6 +365,40 @@ safely and fails below 90% universe coverage.
 (99.0%)**, explicitly rejected five incomplete/ineligible names, and created a
 searchable 56-stock watchlist with active, weakening, and promoted signals.
 
+### Case study — grading live signals before trusting them
+
+![Reversal signal verification](screenshots/30-reversal-signal-verification.png)
+
+**Problem.** The monitor stored every alert but did not close the learning loop:
+there was no answer to whether its published signals later beat SPY. A pooled
+accuracy rate would also be actively misleading because bullish reversal calls
+and bearish breakdown warnings make opposite claims, while repeated daily alerts
+from one episode can make one stock look like many independent observations.
+
+**Product decision.** I added a verification screen that grades each published
+episode after 5, 10, and 20 completed market sessions. Bullish and bearish claims
+stay separate, neutral qualification events receive no directional verdict, and
+each table leads with the decision before exposing event-level evidence. Four
+hypothetical $25,000 books then translate the two strongest bearish findings and
+two weak bullish controls into executable next-open strategies with fixed
+ten-session exits and bounded stops.
+
+**Guardrails.** One qualification episode counts once even when it emits daily.
+Pending windows never become misses; missing prices remain unmeasurable. Returns
+use SPY's completed-session calendar and report both relative and absolute rates.
+The forward books use whole shares and slippage, disclose that borrow fees and
+dividends owed are excluded, and never mix replayed evidence with live-forward
+rankings. Stored outcomes are append-only and rechecked against current adjusted
+prices so a vendor rewrite becomes a visible integrity incident.
+
+**Outcome.** In the first measured window, bearish warnings beat SPY **64.8%**
+of the time after five sessions and **69.1%** after ten; bullish reversal calls
+managed **36.1%** and **29.9%**. The page also shows that the underlying beaten-
+down cohort was already underperforming, preventing the warning rate from being
+presented as pure signal skill. The product therefore keeps the long controls,
+labels the evidence by verdict, and lets future paper results confirm or reject
+the finding instead of promoting the best-looking number.
+
 ### Case study — from signal monitor to measurable paper strategy
 
 ![Reversal Watch paper portfolio](screenshots/22-reversal-paper-portfolio.png)
