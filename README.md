@@ -335,7 +335,10 @@ across the six requested variants. Costs and taxes are disclosed as excluded.
 7.0–9.0% versus SPY&rsquo;s 12.9%. Prior-year winners were stronger, led by the
 10-stock cohort at 21.9% CAGR and 8 wins in 10 years, but its exact sign test was
 `p=0.109`; the product therefore labels it **Promising, unproven** rather than
-turning the best historical line into a deployable strategy.
+turning the best historical line into a deployable strategy. That cohort also
+held NVDA in 7 of 10 years. Leaving NVDA&rsquo;s slot in cash lowered CAGR to 16.8%
+and the SPY win count to 6/10, making the strategy&rsquo;s single-name dependence
+visible beside the headline result.
 
 ### Case study — deterministic S&P 500 Reversal Watch
 
