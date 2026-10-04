@@ -20,7 +20,7 @@ from playwright.sync_api import sync_playwright
 
 DOCS = pathlib.Path(__file__).resolve().parent.parent / "docs"
 BASE = (DOCS / "index.html").as_uri()
-VIEWS = ["dashboard", "verified", "books", "strategies", "jobs", "portfolio",
+VIEWS = ["now", "changed", "dashboard", "verified", "books", "strategies", "jobs", "portfolio",
          "analyzer", "matrix", "seasonality", "reports", "agent"]
 
 errors: list[str] = []
@@ -49,7 +49,8 @@ def click(page, selector: str, what: str) -> bool:
 def main() -> int:
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
-        page = browser.new_page(viewport={"width": 1440, "height": 900})
+        context = browser.new_context(viewport={"width": 1440, "height": 900})
+        page = context.new_page()
         page.on("console", lambda m: errors.append(f"{m.type}: {m.text}") if m.type == "error" else None)
         page.on("pageerror", lambda e: errors.append(f"pageerror: {e}"))
 
@@ -115,14 +116,31 @@ def main() -> int:
         # --- search is a palette: it navigates, never injects --------------
         page.goto(BASE)
         page.wait_for_timeout(250)
-        page.fill("#global-search", "52w")
-        page.wait_for_timeout(250)
-        if page.locator(".search-result").count() == 0:
-            fail("global search returned nothing for a term known to be indexed")
-        elif click(page, ".search-result >> nth=0", "search result"):
+        # The hidden overlay must not swallow clicks on the page behind it —
+        # `.palette-wrap{display:flex}` beat the UA's `[hidden]{display:none}`
+        # and did exactly that.
+        if not page.locator("#palette").is_hidden():
+            fail("the palette is visible before anything opened it")
+        if click(page, "#search-trigger", "palette trigger"):
             page.wait_for_timeout(250)
-            if page.url.endswith("index.html") or page.url.endswith("#dashboard"):
-                fail("the search result did not navigate")
+            page.fill("#global-search", "52w")
+            page.wait_for_timeout(250)
+            if page.locator(".search-result").count() == 0:
+                fail("the palette returned nothing for a term known to be indexed")
+            elif click(page, ".search-result >> nth=0", "search result"):
+                page.wait_for_timeout(250)
+                if page.url.endswith("index.html") or page.url.endswith("#now"):
+                    fail("the search result did not navigate")
+                if not page.locator("#palette").is_hidden():
+                    fail("the palette stayed open after navigating")
+        # A hash change the palette did not initiate — the back button, a
+        # pasted URL — must close it too, or it sits over the new screen.
+        if click(page, "#search-trigger", "palette trigger"):
+            page.wait_for_timeout(200)
+            page.evaluate("location.hash = '#jobs'")
+            page.wait_for_timeout(350)
+            if not page.locator("#palette").is_hidden():
+                fail("the palette survived a navigation it did not initiate")
 
         # --- every screen holds up at desktop and phone width -------------
         for width in (1440, 390):
@@ -147,6 +165,143 @@ def main() -> int:
                         panel.evaluate("el => el.scrollLeft = el.scrollWidth")
                         if panel.evaluate("el => el.scrollLeft") <= 0:
                             fail(f"#{view} at {width}px hides {hidden}px of a table that cannot be scrolled")
+
+        # --- the queue routes you, rather than naming a problem and stopping -
+        page.set_viewport_size({"width": 1440, "height": 900})
+        page.goto(f"{BASE}#now")
+        page.wait_for_timeout(300)
+        rows = page.locator("table.queue tbody tr")
+        if rows.count() == 0:
+            if page.locator(".good-empty").count() == 0:
+                fail("an empty queue renders no explicit good-empty state")
+        else:
+            if page.locator("table.queue .act-btn").count() < rows.count():
+                fail("a queue row rendered without a next action")
+            # Every row's link must land on the section that owns the number.
+            page.locator("table.queue .q-what").first.click()
+            page.wait_for_timeout(300)
+            if page.url.endswith("#now"):
+                fail("a queue row's link did not navigate")
+            page.go_back()
+            page.wait_for_timeout(250)
+
+        # Copying is the honest alternative to a button this console cannot
+        # honour, so it has to actually put the command on the clipboard.
+        page.goto(f"{BASE}#now")
+        page.wait_for_timeout(300)
+        context.grant_permissions(["clipboard-read", "clipboard-write"])
+        cmd = page.locator(".act-btn.cmd").first
+        if cmd.count():
+            expected = cmd.get_attribute("data-copy")
+            cmd.click()
+            page.wait_for_timeout(400)
+            got = page.evaluate("navigator.clipboard.readText()")
+            if got != expected:
+                fail(f"copying the command put {got!r} on the clipboard, not the command")
+            if "/Users/" in (expected or ""):
+                fail("a published command carries an absolute local path")
+
+        # --- a conclusion's emphasis must not break its own sentence --------
+        # `.insight strong` as a bare descendant rule also caught every
+        # <strong> inside the detail paragraph, rendering each as its own 14px
+        # block: a sentence became five lines with its full stop stranded on
+        # the last one. Invisible to any test that reads source.
+        page.goto(f"{BASE}#changed")
+        page.wait_for_timeout(300)
+        inline = page.evaluate(
+            "[...document.querySelectorAll('.insight p strong')]"
+            ".every(el => getComputedStyle(el).display === 'inline')")
+        if not inline:
+            fail("a <strong> inside a conclusion's detail renders as a block, breaking the sentence")
+
+        # --- the delta names its window ------------------------------------
+        page.goto(f"{BASE}#changed")
+        page.wait_for_timeout(300)
+        changed_text = page.inner_text("#view-root")
+        if "last completed session" not in changed_text:
+            fail("the Changed view does not name its window in the browser")
+
+        # --- the mode switch survives a reload ------------------------------
+        page.goto(BASE)
+        page.wait_for_timeout(300)
+        page.click('[data-mode-btn="overview"]')
+        page.wait_for_timeout(350)
+        if page.locator(".purpose").count() == 0:
+            fail("Overview mode shows no purpose line")
+        page.reload()
+        page.wait_for_timeout(500)
+        if page.locator(".purpose").count() == 0:
+            fail("the mode switch did not survive a reload")
+        page.click('[data-mode-btn="operator"]')
+        page.wait_for_timeout(350)
+        if page.locator(".purpose").count() != 0:
+            fail("Operator mode still shows the purpose line")
+
+        # --- the palette opens on a key and moves on arrows -----------------
+        page.goto(BASE)
+        page.wait_for_timeout(300)
+        page.keyboard.press("Control+k")
+        page.wait_for_timeout(250)
+        if page.locator("#palette").is_hidden():
+            fail("Ctrl/Cmd-K did not open the palette")
+        if page.evaluate("document.activeElement && document.activeElement.id") != "global-search":
+            fail("Ctrl/Cmd-K did not focus the palette input")
+        # A term that spans several groups, or the rendered order and the
+        # relevance order coincide and the assertion below proves nothing.
+        page.keyboard.type("valuation")
+        page.wait_for_timeout(300)
+        if page.locator('.search-result[aria-selected="true"]').count() != 1:
+            fail("the palette has no selected option after typing")
+        # The cursor indexes `hits`, but rows render grouped — sorted by
+        # relevance alone, index 0 highlighted whichever row happened to sit
+        # seventh on screen and the arrows walked an invisible order.
+        groups = page.locator(".pal-group").count()
+        if groups < 2:
+            fail(f"the palette ordering check ran over {groups} group(s) — it proves nothing")
+        if page.locator(".search-result").first.get_attribute("aria-selected") != "true":
+            fail("the palette's selection is not on the first rendered row")
+        first = page.locator(".search-result").first.inner_text()
+        page.keyboard.press("ArrowDown")
+        page.wait_for_timeout(150)
+        if page.locator('.search-result[aria-selected="true"]').inner_text() == first:
+            fail("ArrowDown did not move the palette selection")
+        page.keyboard.press("Enter")
+        page.wait_for_timeout(350)
+        if page.url.rstrip("#").endswith("index.html"):
+            fail("Enter on a palette result did not navigate")
+        # `/` is the other way in, and must not fire while typing in a field.
+        page.goto(BASE)
+        page.wait_for_timeout(250)
+        page.keyboard.press("/")
+        page.wait_for_timeout(250)
+        if page.locator("#palette").is_hidden():
+            fail("`/` did not open the palette")
+        # Escape must close it, or the overlay traps the reader.
+        page.keyboard.press("Escape")
+        page.wait_for_timeout(250)
+        if not page.locator("#palette").is_hidden():
+            fail("Escape did not close the palette")
+
+        # --- raw rows sit behind a default-closed disclosure -----------------
+        # The density complaint was never too much data — it was that the
+        # finding and the evidence carried equal weight. These two screens are
+        # the long ones, so they are where the rule has to hold.
+        for view in (f"{BASE}#jobs", f"{BASE}#verified/NEW_52W_LOW"):
+            page.goto(view)
+            page.wait_for_timeout(300)
+            apx = page.locator("details.apx").first
+            if apx.count() == 0:
+                fail(f"{view} has no disclosure — the long table is still beside the conclusion")
+                continue
+            if apx.evaluate("el => el.open"):
+                fail(f"{view} opens its disclosure by default, so nothing is actually deferred")
+            rows_hidden = apx.locator("tbody tr").count()
+            apx.locator("summary").click()
+            page.wait_for_timeout(250)
+            if not apx.evaluate("el => el.open"):
+                fail(f"{view} has a disclosure that does not open when clicked")
+            if rows_hidden < 5:
+                fail(f"{view} defers only {rows_hidden} rows — not worth a disclosure")
 
         # --- charts actually draw ----------------------------------------
         page.set_viewport_size({"width": 1440, "height": 900})

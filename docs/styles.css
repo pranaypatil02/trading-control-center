@@ -46,7 +46,9 @@ button { color: inherit; }
 .brand-mark i:nth-child(2) { height: 16px; }
 .brand-mark i:nth-child(3) { height: 11px; }
 
-.search { position: relative; display: flex; align-items: center; gap: 8px; margin: 0 4px 13px; padding: 9px 9px; border: 1px solid #35433c; border-radius: 8px; color: #8da098; background: #111a16; }
+.search { position: relative; width: calc(100% - 8px); display: flex; align-items: center; gap: 8px; margin: 0 4px 13px; padding: 9px; border: 1px solid #35433c; border-radius: 8px; color: #8da098; background: #111a16; cursor: pointer; text-align: left; font-size: 12px; }
+.search:hover { border-color: #51645b; color: #b7c7bf; }
+.search-label { flex: 1; }
 .search:focus-within { border-color: #749084; box-shadow: 0 0 0 3px rgb(116 144 132 / 12%); }
 .search input { width: 100%; border: 0; outline: 0; color: white; background: transparent; font-size: 12px; }
 .search input::placeholder { color: #82938b; }
@@ -298,7 +300,11 @@ h1 { margin: 0; font-size: 25px; line-height: 1.15; letter-spacing: -.035em; }
 
 /* A conclusion always sits above its evidence. */
 .insight { margin-bottom: 16px; padding: 15px 17px; border: 1px solid var(--line); border-left: 4px solid var(--ink); border-radius: 9px; background: var(--panel); box-shadow: var(--shadow); }
-.insight strong { display: block; font-size: 14px; letter-spacing: -.015em; }
+/* Scoped to the direct child. As a bare descendant rule this also caught
+   every <strong> inside the detail paragraph and rendered it as its own
+   14px block, which broke a sentence into five lines and stranded its
+   full stop. One selector, two meanings -- the same defect `.meta` had. */
+.insight > strong { display: block; font-size: 14px; letter-spacing: -.015em; }
 .insight p { margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
 .insight em { color: var(--ink); font-style: italic; }
 
@@ -515,3 +521,107 @@ section.panel > table { min-width: 560px; }
 .verdict-card.verdict-copy::before { background: var(--line-strong); }
 .ci.thin { height: 26px; }
 .ci.thin .ci-thin { top: 13px; right: auto; left: 0; }
+
+/* ===================================================================
+   Workflow refinement — the queue, the delta, disclosure, mode switch.
+   =================================================================== */
+
+/* --- the queue ----------------------------------------------------- */
+.jobs-table.queue td { vertical-align: middle; }
+.jobs-table.queue td.cls { width: 104px; }
+.jobs-table.queue td.when { width: 92px; color: var(--muted); }
+.jobs-table.queue td.do { width: 216px; text-align: right; }
+.q-what { padding: 0; border: 0; color: var(--ink); background: transparent; cursor: pointer; text-align: left; font-size: 12px; font-weight: 760; }
+.q-what:hover, .q-what:focus-visible { color: var(--blue); text-decoration: underline; }
+.jobs-table.queue small { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+
+/* Consequence class, named on the row. Ranked positions → integrity → reporting. */
+.cls-chip { display: inline-block; padding: 4px 8px; border-radius: 11px; font-size: 8px; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.cls-chip.positions { color: var(--red); background: var(--red-soft); }
+.cls-chip.integrity { color: var(--amber); background: var(--amber-soft); }
+.cls-chip.reporting { color: var(--muted); background: #ebece7; }
+
+.act-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 11px; border: 1px solid var(--line-strong); border-radius: 7px; background: white; cursor: pointer; font-size: 10px; font-weight: 750; white-space: nowrap; }
+.act-btn:hover { border-color: #9fb0a5; background: var(--panel-soft); }
+.act-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; }
+.act-btn.do { border-color: #a9cdba; color: #1d6647; background: var(--green-soft); }
+.act-btn.open { border-color: transparent; color: var(--blue); background: transparent; }
+.act-btn.open:hover { background: var(--blue-soft); }
+.act-btn.cmd.copied { border-color: #a9cdba; color: #1d6647; background: var(--green-soft); }
+
+/* An empty queue is the good state and must not read as a failed section. */
+.good-empty { display: flex; align-items: center; gap: 10px; margin: 0; padding: 16px 18px; border: 1px solid #b9dcc9; border-radius: 9px; color: #34614b; background: var(--green-soft); font-size: 11px; line-height: 1.55; }
+.good-empty span { color: var(--green); font-size: 14px; font-weight: 850; }
+
+/* --- the delta ----------------------------------------------------- */
+.jobs-table td.was { color: var(--muted); }
+.jobs-table td.dirmark { width: 104px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10px; white-space: nowrap; }
+.jobs-table td.dirmark.up { color: var(--green); }
+.jobs-table td.dirmark.down { color: var(--red); }
+.jobs-table td.dirmark.flat { color: var(--faint); }
+.kv-list.refusals { grid-template-columns: 180px 1fr; }
+.kv-list.refusals dd { font-family: inherit; font-weight: 500; color: var(--muted); text-align: left; }
+
+/* --- disclosure ---------------------------------------------------- */
+details.apx { margin-top: 14px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); overflow: hidden; }
+details.apx > summary { display: flex; align-items: center; gap: 9px; padding: 11px 15px; cursor: pointer; color: var(--muted); font-size: 10px; font-weight: 750; list-style: none; }
+details.apx > summary::-webkit-details-marker { display: none; }
+details.apx > summary::before { content: "▸"; color: var(--faint); font-size: 9px; }
+details.apx[open] > summary::before { content: "▾"; }
+details.apx > summary:hover { color: var(--ink); background: var(--panel-soft); }
+details.apx > summary b { margin-left: auto; padding: 2px 7px; border-radius: 10px; color: var(--muted); background: #ebece7; font-size: 9px; }
+.apx-body { border-top: 1px solid var(--line); }
+.apx-body > table { width: 100%; border-collapse: collapse; }
+
+/* --- mode switch and purpose lead ---------------------------------- */
+.mode-switch { display: inline-flex; padding: 3px; border-radius: 8px; background: #eeede8; }
+.mode-switch button { padding: 6px 11px; border: 0; border-radius: 6px; color: var(--muted); background: transparent; cursor: pointer; font-size: 10px; font-weight: 750; }
+.mode-switch button.on { color: var(--ink); background: white; box-shadow: 0 1px 3px rgb(0 0 0 / 8%); }
+.purpose { margin: 0 0 16px; padding: 13px 16px; border: 1px solid #c9dcf2; border-radius: 9px; color: #1f4a7a; background: var(--blue-soft); font-size: 11px; line-height: 1.6; }
+.purpose b { color: #15395e; }
+.purpose em { font-style: italic; }
+
+/* --- palette ------------------------------------------------------- */
+.search-result small.hint { display: block; margin-top: 2px; color: #8a9b92; font-size: 9px; font-weight: 500; }
+.search-result[aria-selected="true"] { background: #2b3932; }
+.search-result[aria-selected="true"] span { color: white; }
+
+@media (max-width: 760px) {
+  .jobs-table.queue td.do { width: auto; }
+  .jobs-table.queue td.when { display: none; }
+  .mode-switch { display: none; }
+  .kv-list.refusals { grid-template-columns: 1fr; }
+}
+
+/* --- the palette as a centred overlay ------------------------------- */
+/* Confined to the 256px rail it truncated names, wrapped two-line results and
+   covered the navigation it was meant to replace — poor for what is now the
+   primary way in. */
+/* `[hidden]` is a UA rule at specificity 0,0,1; a class setting `display`
+   beats it, so the hidden overlay stayed laid out and its scrim swallowed
+   every click on the page behind it. */
+.palette-wrap[hidden] { display: none; }
+.palette-wrap { position: fixed; inset: 0; z-index: 70; display: flex; align-items: flex-start; justify-content: center; padding: 10vh 16px 16px; }
+.palette-scrim { position: absolute; inset: 0; background: rgb(14 22 18 / 42%); backdrop-filter: blur(2px); }
+.palette { position: relative; width: 100%; max-width: 620px; max-height: 72vh; display: flex; flex-direction: column; border-radius: 13px; background: var(--panel); box-shadow: 0 24px 70px rgb(14 22 18 / 38%); overflow: hidden; }
+.palette-input { display: flex; align-items: center; gap: 10px; padding: 15px 17px; border-bottom: 1px solid var(--line); color: var(--faint); }
+.palette-input input { flex: 1; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 14px; }
+.palette-input input::placeholder { color: var(--faint); }
+.palette-input kbd { padding: 3px 6px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--muted); font-size: 9px; font-family: inherit; }
+.palette .search-results { position: static; inset: auto; flex: 1; padding: 7px; border: 0; border-radius: 0; background: transparent; box-shadow: none; overflow-y: auto; }
+.pal-group { margin: 9px 10px 4px; color: var(--muted); font-size: 8px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
+.palette .search-result { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 9px 11px; border: 0; border-radius: 7px; color: var(--ink); background: transparent; cursor: pointer; text-align: left; font-size: 12px; }
+.palette .search-result:hover { background: var(--panel-soft); }
+.palette .search-result[aria-selected="true"] { color: white; background: var(--sidebar); }
+.palette .search-result[aria-selected="true"] .hint,
+.palette .search-result[aria-selected="true"] .kind { color: #9fb2a8; }
+.palette .search-result .hint { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; font-weight: 500; }
+.palette .search-result .kind { color: var(--faint); font-size: 9px; font-weight: 700; white-space: nowrap; }
+.pal-none { margin: 0; padding: 26px 18px; color: var(--muted); text-align: center; font-size: 11px; line-height: 1.6; }
+.palette-foot { display: flex; gap: 16px; padding: 10px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; }
+.palette-foot kbd { padding: 2px 5px; border: 1px solid var(--line-strong); border-radius: 4px; font-size: 9px; font-family: inherit; }
+/* A retired name is named, not hidden: a reader looking for `pead_open` should
+   learn where the work went rather than finding nothing. */
+.heat-cell.retired { background: #d4d8d3; }
+.legend-dots i.ret { background: #d4d8d3; }
+.status.retired { color: var(--muted); background: #ebece7; }

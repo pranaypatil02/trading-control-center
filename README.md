@@ -33,17 +33,20 @@ to the individual stock that produced it:
 
 | Start here | One level down | Two levels down |
 |---|---|---|
+| **Now** — everything needing a decision, ranked by consequence | The section that owns the number | The job, book or episode behind it |
+| **Changed** — what moved since the last completed session | The thing that moved | Its own history |
 | Signal verification — did the published signals work? | Any of 13 event types, with its interval and verdict | A single episode, graded at 5, 10 and 20 sessions |
 | Forward tests — 14 hypothetical $25,000 books | A book's performance, contract, trades and costs | Why that book can or cannot be ranked |
 | Strategy registry — 69 strategies by lifecycle stage | A strategy's workspace, jobs and attached book | The run history of any job behind it |
 | Bots & jobs — one square per job, grouped by owner | A job's reliability strip and alerting rules | — |
 | Portfolio · analyzer · breadth · seasonality | Holding, company, industry and candidate detail | Per-layer evidence, with its polarity |
 
-**▶ Guided walkthrough.** A 14-step narrated tour drives the prototype through
+**▶ Guided walkthrough.** A 17-step narrated tour drives the prototype through
 one path — each step navigates to a real screen and highlights the thing being
 discussed — so a demo is reproducible rather than remembered. Press the button
 in the header, or arrow-key through it. Every step is a real URL, so a viewer
-can stop at any point and keep exploring from there.
+can stop at any point and keep exploring from there. **⌘K** or **/** opens the
+palette from anywhere.
 
 Research figures in the prototype are the platform's **own measured output**.
 Portfolio balances, the breadth tiles and the analyzer companies are synthetic,
@@ -524,6 +527,85 @@ beside the result and deliberately not subtracted, because no measured constant
 says what to deflate it by. The product therefore keeps the long controls,
 labels the evidence by verdict, and lets future forward results confirm or
 reject the finding instead of promoting the best-looking number.
+
+### Case study — turning a status board into a workflow
+
+![What needs a decision](screenshots/23-platform-dashboard-latest.png)
+
+**Problem.** Asked where the console lost them, its operator named four things
+at once: too many places to look, no next action, too dense, and no sense of
+what had changed. Those are not four problems. A console whose unit is *a
+screen about a subsystem* makes you assemble the day's work by visiting
+seventeen of them; a console whose unit is *a thing that needs deciding* does
+that assembly itself.
+
+**What the measurement showed.** Three of the four already had their mechanism
+built and unused, which is what made this cheap rather than a rewrite. An
+action queue existed — and its rows were four read-only cells with a hover
+highlight and **no click target**, so it named a problem and abandoned you. The
+collapse primitive existed with **4 call sites against the panel's 112**. The
+palette existed, indexing four kinds of thing out of seventeen sections, with
+**no ⌘K and no `/`**. Only the fourth was genuinely missing — and nearly every
+store here is already keyed by date, so a delta layer was a read, not a
+migration.
+
+**Product decision.** A queue row is a decision, so it carries two new things:
+where it lives, and what to do next in exactly one of three kinds — **do it
+here** where a route exists, **copy the exact command** where one does not, or
+**open the evidence** where the next step is judgement. There is never a fourth
+kind, because this console places no orders and runs nothing remotely; a row it
+cannot act on states the command rather than offering a button that lies. Rows
+rank by consequence class, named on the row, not by age and not by an invented
+score.
+
+**The queue is only useful if it is short, and getting there was the work.** The
+first build had **30 rows**. Judging every job against one global threshold
+flagged all the weekly and monthly work as late — the exact fault the console
+had already fixed once and this had re-imported. Judging each job against its
+*own* observed rhythm cut it to nine. Seven of those nine were **ghosts**:
+renamed jobs whose rows linger for ever because nothing runs under the old name
+again, while their successors ran fine every morning. Retiring them — but only
+while the successor is healthy, or renaming becomes a way to silence a job —
+left **two**.
+
+**Guardrails.** "What changed" compares the last two completed market sessions
+rather than your last visit, so the page is reproducible and two readers see the
+same thing; the window it used is named on the page, and a window the history
+cannot answer is refused in words rather than rendered as an empty table that
+reads like a quiet day. No materiality threshold anywhere — no measured constant
+makes 5% of drift actionable and 4% not — so rows are ranked and each group
+states its population. And the queue is built on exactly one screen, pinned by
+test: the dashboard used to build its own from a different rule, which is how
+this estate once reported 558 things needing attention when three were
+incidents.
+
+**Outcome.** The rail deliberately did not shrink — this console has been bitten
+before by burying a surface in a sub-tab. Instead the front door changed and the
+palette became good enough that the rail is not how you navigate: every screen,
+sub-view, strategy, book, job, signal type, holding and industry, grouped by
+kind, with arrow keys and a real `role="option"` contract the markup previously
+only promised.
+
+<table>
+  <tr>
+    <td width="50%"><img src="screenshots/35-what-changed.png" alt="What changed since the last completed session"></td>
+    <td width="50%"><img src="screenshots/36-command-palette.png" alt="The command palette grouped by kind"></td>
+  </tr>
+  <tr>
+    <td><b>The daily question.</b> What moved since the last completed session, each row reading <i>was → is</i>, ranked by size with the population stated and no materiality cutoff invented.</td>
+    <td><b>⌘K is the way in.</b> Grouped by kind, with the hint that tells two similarly-named things apart. Arrow keys walk the rendered order — which is a fix, not a given.</td>
+  </tr>
+</table>
+
+Six defects were found building it, each caught by a harness rather than by
+eye: a mis-named key that exported **zero** episodes and emptied every
+drill-down table while the render harness still passed; `.insight strong` as a
+bare descendant rule breaking a sentence into five lines; a hidden overlay whose
+`display:flex` beat the UA's `[hidden]` and swallowed every click on the page
+behind it; a palette whose arrow keys walked an order nobody could see, because
+the cursor indexed relevance while the rows rendered grouped; a palette that
+survived a navigation it did not initiate; and retired jobs counted as faults,
+painting whole groups amber for nothing being wrong.
 
 ### Case study — a dead config field, and the six rules that replaced it
 

@@ -9,16 +9,28 @@
 (function () {
   const STEPS = [
     {
-      path: "dashboard",
-      title: "Start with the question, not the data",
-      body: "The console opens on an <strong>action queue</strong>: what is broken, what is past its schedule, what needs a decision. It used to open on stock picks while the watchdog and seventeen jobs were failing, with “needs attention” sixth of six blocks.",
+      path: "now",
+      title: "A row is a decision, not a status",
+      body: "The console opens on what needs deciding, <strong>ranked by consequence rather than by age</strong>. Every row says where it lives and what to do next — do it here where a route exists, copy the exact command where one does not, or open the evidence where the next step is judgement. Nothing offers a button this console cannot honour.",
       focus: '[data-tour="queue"]',
     },
     {
-      path: "dashboard",
-      title: "Opposite claims are never pooled",
-      body: "Two numbers, never averaged. Pooling them produces the single rate shown in the caveat below the tiles — an average of opposite claims, which rises as the bullish calls get worse and falls as they improve. The first draft of this screen published exactly that as the headline.",
-      focus: '[data-tour="verdicts"]',
+      path: "now",
+      title: "The queue is only useful if it is short",
+      body: "This one had <strong>thirty rows</strong> on its first build, then nine. Judging each job against a global threshold flagged every weekly and monthly job as late; judging against each job’s <em>own</em> rhythm cut it to nine. Seven of those nine were renamed jobs whose successors ran fine every morning — ghosts the ledger cannot distinguish from stopped work. Two rows left.",
+      focus: ".caveat",
+    },
+    {
+      path: "changed",
+      title: "The daily question a status board cannot answer",
+      body: "What moved since the last completed session. The window is a <strong>market session, not your last visit</strong>, so the page is reproducible and two people see the same thing. Nearly every store here is already keyed by date, so this was a read — no new table, no backfill.",
+      focus: ".insight",
+    },
+    {
+      path: "changed",
+      title: "No materiality threshold, ever",
+      body: "No measured constant makes 5% of drift actionable and 4% not, so rows are ranked by size and each group states the population it came from. And a window nobody can answer is <strong>refused in words</strong> — an empty table reads as a quiet day, which is the opposite of the truth.",
+      focus: null,
     },
     {
       path: "verified",
@@ -87,7 +99,13 @@
       focus: ".agent-side",
     },
     {
-      path: "dashboard",
+      path: "now",
+      title: "⌘K is how you actually navigate",
+      body: "The rail deliberately did not shrink — this console has been bitten before by burying a surface in a sub-tab. Instead the palette got good enough that the rail is not how you get around: every screen, sub-view, strategy, book, job, signal type, holding and industry, grouped by kind, with arrow keys. Press <strong>⌘K</strong> or <strong>/</strong>.",
+      focus: "#search-trigger",
+    },
+    {
+      path: "now",
       title: "That is the loop",
       body: "Idea → point-in-time backtest → evidence gate → a measurable forward book → a verdict that can overturn it. The through-line is that <strong>every screen states its conclusion above its evidence</strong>, and every refusal says why. Explore from here — each screen has at least one level beneath it.",
       focus: null,

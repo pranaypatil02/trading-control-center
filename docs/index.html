@@ -23,17 +23,18 @@
         <span><strong>Control Center</strong><small>Trading operations</small></span>
       </div>
 
-      <label class="search">
+      <button class="search" id="search-trigger" aria-haspopup="dialog">
         <span aria-hidden="true">⌕</span>
-        <input id="global-search" type="search" placeholder="Find anything" autocomplete="off">
+        <span class="search-label">Find anything</span>
         <kbd>⌘ K</kbd>
-      </label>
-      <div id="search-results" class="search-results" hidden></div>
+      </button>
 
       <nav id="primary-nav">
         <p class="nav-label">Today</p>
-        <button class="nav-item active" data-go="dashboard" data-view="dashboard"><span class="nav-icon">◫</span><span>Platform dashboard</span></button>
-        <button class="nav-item" data-go="verified" data-view="verified"><span class="nav-icon">✓</span><span>Were they right?</span><b>new</b></button>
+        <button class="nav-item active" data-go="now" data-view="now"><span class="nav-icon">◉</span><span>Now</span><b id="nav-now">—</b></button>
+        <button class="nav-item" data-go="changed" data-view="changed"><span class="nav-icon">↗</span><span>Changed</span><b id="nav-changed">—</b></button>
+        <button class="nav-item" data-go="dashboard" data-view="dashboard"><span class="nav-icon">◫</span><span>Platform dashboard</span></button>
+        <button class="nav-item" data-go="verified" data-view="verified"><span class="nav-icon">✓</span><span>Were they right?</span></button>
         <button class="nav-item" data-go="seasonality" data-view="seasonality"><span class="nav-icon">◌</span><span>Seasonality board</span></button>
 
         <p class="nav-label">Running</p>
@@ -65,13 +66,33 @@
           <h1 id="page-title">What to look at today</h1>
         </div>
         <div class="top-actions">
+          <div class="mode-switch" role="group" aria-label="Reading mode">
+            <button data-mode-btn="operator" class="on">Operator</button>
+            <button data-mode-btn="overview">Overview</button>
+          </div>
           <button class="primary-button" id="tour-button"><span aria-hidden="true">▶</span> Guided walkthrough</button>
-          <span class="as-of"><i></i><span><small>Prototype state</small><strong>All screens live</strong></span></span>
         </div>
       </header>
 
       <section id="view-root" aria-live="polite"></section>
     </main>
+  </div>
+
+  <!-- The palette is the primary way in now that the rail is not shrinking, so
+       it gets the width to show a full name and its kind rather than being
+       confined to a 256px column that truncated both and covered the nav. -->
+  <div class="palette-wrap" id="palette" hidden>
+    <div class="palette-scrim" data-palette-close></div>
+    <div class="palette" role="dialog" aria-modal="true" aria-label="Find anything">
+      <div class="palette-input">
+        <span aria-hidden="true">⌕</span>
+        <input id="global-search" type="search" placeholder="Search screens, strategies, books, jobs, signals, holdings…"
+               autocomplete="off" role="combobox" aria-expanded="false" aria-controls="search-results">
+        <kbd>esc</kbd>
+      </div>
+      <div id="search-results" class="search-results" role="listbox" aria-label="Results"></div>
+      <div class="palette-foot"><span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span><kbd>/</kbd> opens this too</span></div>
+    </div>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

@@ -63,6 +63,44 @@ function metricCards(cards) {
     .join("")}</div>`;
 }
 
+/* Raw rows go behind this, never beside the conclusion. The density complaint
+ * was never that there is too much data — it is that the finding and the
+ * evidence for it carried equal weight on the page. */
+function disclosure(label, inner, count) {
+  return `<details class="apx"><summary>${esc(label)}${
+    count === undefined ? "" : `<b>${num(count)}</b>`
+  }</summary><div class="apx-body">${inner}</div></details>`;
+}
+
+/* A queue row's next action, in one of exactly three kinds and never a fourth.
+ *
+ * This console places no orders and runs nothing remotely, so where it cannot
+ * act it states the command to run rather than offering a button that lies.
+ * One renderer, so the three tiers cannot drift apart. */
+function nextAction(action, where) {
+  if (!action) return "";
+  if (action.kind === "command") {
+    return `<button class="act-btn cmd" data-copy="${esc(action.value)}" title="${esc(action.value)}"><span aria-hidden="true">⧉</span> ${esc(action.label)}</button>`;
+  }
+  if (action.kind === "route") {
+    return `<button class="act-btn do" ${go(action.to || where)}><span aria-hidden="true">✓</span> ${esc(action.label)}</button>`;
+  }
+  return `<button class="act-btn open" ${go(action.to || where)}>${esc(action.label)} →</button>`;
+}
+
+/* Consequence, not age. A job that failed once this morning does not outrank a
+ * book that has gone unmarked for a week. */
+const CLASS_ONE = {
+  positions: ["position", "positions"],
+  integrity: ["integrity issue", "integrity issues"],
+  reporting: ["stale report", "stale reports"],
+};
+const CLASS_LABEL = {
+  positions: ["Positions", "money or an open position is affected"],
+  integrity: ["Integrity", "a measurement or the data under it is wrong"],
+  reporting: ["Reporting", "something is late or stale"],
+};
+
 /* ------------------------------------------------------------------ charts */
 /* One equity-curve renderer for every book, so two surfaces cannot draw the
  * same series differently. Nulls break the path rather than bridging a gap. */
@@ -113,6 +151,113 @@ function sparkRow(values) {
     .join("")}</span>`;
 }
 
+/* ------------------------------------------------------------------ 0. now */
+/* The front door. One ranked list of things that need deciding, each carrying
+ * where it lives and what to do about it — so the reader stops having to know
+ * which of the sections holds the answer. */
+function renderNow() {
+  const q = D.queue || [];
+  const byClass = {};
+  q.forEach((r) => (byClass[r.cls] = (byClass[r.cls] || 0) + 1));
+  const v = D.verification;
+  const bear = v.totals.find((t) => t.horizon === 10 && t.direction === "bearish");
+  const bull = v.totals.find((t) => t.horizon === 10 && t.direction === "bullish");
+
+  const row = (r) => `<tr>
+    <td class="cls"><span class="cls-chip ${r.cls}" title="${esc(CLASS_LABEL[r.cls][1])}">${CLASS_LABEL[r.cls][0]}</span></td>
+    <td><button class="q-what" ${go(r.where)}>${esc(r.what)}</button>
+        <small>${esc(r.detail)}</small></td>
+    <td class="n when">${esc(r.when || "")}</td>
+    <td class="do">${nextAction(r.action, r.where)}</td></tr>`;
+
+  const queue = q.length
+    ? `<section class="panel" data-tour="queue">
+        <div class="panel-head"><div><h2>Needs a decision — ${q.length}</h2>
+          <p>Ranked by consequence, not by age. Every row says where it lives and what to do next.</p></div>
+          <span class="status ${byClass.positions ? "failing" : "stale"}">${
+            Object.entries(byClass).map(([k, n]) => `${n} ${CLASS_ONE[k][n === 1 ? 0 : 1]}`).join(" · ")
+          }</span></div>
+        <table class="jobs-table queue"><thead><tr><th>Consequence</th><th>What</th><th>Since</th><th>Next action</th></tr></thead>
+        <tbody>${q.map(row).join("")}</tbody></table></section>`
+    : `<section class="panel" data-tour="queue"><div class="panel-head"><div><h2>Needs a decision — none</h2>
+        <p>Nothing is failing, no book is unmarked, and every report is inside its own cadence.</p></div>
+        <span class="status healthy">Clear</span></div>
+        <div class="panel-body"><p class="good-empty"><span aria-hidden="true">✓</span>
+        Nothing needs you. This is the good state, not a section that failed to load.</p></div></section>`;
+
+  return `
+    ${insight(
+      q.length
+        ? `${q.length} thing${q.length === 1 ? "" : "s"} need a decision. ${
+            byClass.positions ? `${byClass.positions} touch${byClass.positions === 1 ? "es" : ""} positions.` : "None touches a position."
+          }`
+        : "Nothing needs a decision.",
+      `Every row below carries its own next action: do it here where a route exists, copy the exact command where one does not, or open the evidence where the next step is judgement. Nothing offers a button this console cannot honour.`
+    )}
+    ${queue}
+    ${metricCards([
+      ["Bearish warnings · 10d", pct(bear.hit_rate), `${bear.scored} episodes beat SPY`, "positive"],
+      ["Bullish calls · 10d", pct(bull.hit_rate), `${bull.scored} episodes beat SPY`, "negative"],
+      ["Rankable books", `${D.books.filter((b) => b.rankable).length} of ${D.books.length}`, "63-session floor enforced", ""],
+      ["Jobs on cadence", `${D.jobs.filter((j) => j.status === "healthy").length} of ${D.jobs.filter((j) => j.status !== "retired").length}`, `own rhythm, not one threshold · ${D.jobs.filter((j) => j.status === "retired").length} retired names excluded`, ""],
+    ])}
+    ${caveat(
+      "A renamed job is not a stopped job, and the ledger cannot tell them apart — seven retired names once filled this queue while their successors ran fine every morning. They are named on the jobs grid, not queued here, and the retirement holds only while the successor is healthy."
+    )}`;
+}
+
+/* -------------------------------------------------------------- 0b. changed */
+function renderChanged() {
+  const c = D.changed || {};
+  const w = c.window || {};
+  const groups = c.groups || [];
+  const moved = groups.reduce((a, g) => a + g.rows.length, 0);
+
+  const dirMark = (d) => (d === "up" ? "▲" : d === "down" ? "▼" : "•");
+
+  return `
+    ${insight(
+      `${moved} thing${moved === 1 ? "" : "s"} moved ${esc(w.label || "")}.`,
+      `Comparing <strong>${esc(w.from)}</strong> with <strong>${esc(w.to)}</strong>. The window is a completed market session rather than your last visit, so this page is reproducible and two readers see the same thing.`
+    )}
+
+    ${groups
+      .map((g) => {
+        const body = g.rows.length
+          ? `<table class="jobs-table"><thead><tr><th>What</th><th>Was</th><th></th><th>Is now</th></tr></thead>
+             <tbody>${g.rows
+               .map(
+                 (r) => `<tr class="${r.where ? "clickable" : ""}" ${r.where ? go(r.where) : ""}>
+              <td><strong>${esc(r.what)}</strong><small>${esc(r.note || "")}</small></td>
+              <td class="n was">${esc(r.from)}</td>
+              <td class="n dirmark ${r.dir}">${dirMark(r.dir)}${
+                   r.delta !== undefined ? ` ${signed(r.delta)}` : ""
+                 }</td>
+              <td class="n">${esc(r.to)}</td></tr>`
+               )
+               .join("")}</tbody></table>`
+          : `<div class="panel-body"><p class="good-empty"><span aria-hidden="true">✓</span>
+             Nothing in this group changed over the window. That is a measurement, not a missing table.</p></div>`;
+        return `<section class="panel"><div class="panel-head"><div><h2>${esc(g.label)} — ${g.rows.length}</h2>
+          <p>${g.note}</p></div><span class="meta-pill">of ${esc(g.population)}</span></div>${body}</section>`;
+      })
+      .join("")}
+
+    ${
+      (c.refused || []).length
+        ? `<section class="panel"><div class="panel-head"><div><h2>Windows this page will not answer</h2>
+      <p>A window nobody can answer is refused in words. An empty table reads as a quiet day, which is the opposite of the truth.</p></div></div>
+      <div class="panel-body"><dl class="kv-list refusals">${(c.refused || [])
+        .map((r) => `<dt>${esc(r.window)}</dt><dd>${esc(r.why)}</dd>`)
+        .join("")}</dl></div></section>`
+        : ""
+    }
+
+    ${caveat(
+      "There is no materiality threshold here, and there will not be one: no measured constant makes 5% of drift actionable and 4% not. Rows are ranked by size and each group states the population it was drawn from."
+    )}`;
+}
+
 /* ------------------------------------------------------------- 1. dashboard */
 function renderDashboard() {
   const v = D.verification;
@@ -121,7 +266,7 @@ function renderDashboard() {
   const failing = D.jobs.filter((j) => j.status === "failing");
   const stale = D.jobs.filter((j) => j.status === "stale");
   const ranked = D.books.filter((b) => b.rankable);
-  const queue = [...failing, ...stale].slice(0, 5);
+  const queued = (D.queue || []).length;
 
   return `
     <div class="verdict">
@@ -153,23 +298,17 @@ function renderDashboard() {
     ])}
 
     <div class="dashboard-grid">
-      <section class="panel" data-tour="queue">
-        <div class="panel-head"><div><h2>Action queue — ${queue.length}</h2>
-          <p>Jobs and schedules, not trade picks. An empty queue is the good state and says so.</p></div>
-          <span class="status ${failing.length ? "failing" : "healthy"}">${failing.length ? "Action" : "Clear"}</span></div>
+      <section class="panel">
+        <div class="panel-head"><div><h2>What needs a decision</h2>
+          <p>Owned by one screen, so there is no second answer to the same question.</p></div>
+          <span class="status ${queued ? "failing" : "healthy"}">${queued ? "Action" : "Clear"}</span></div>
         <div class="panel-body">
-          <div class="attention-list">${
-            queue.length
-              ? queue
-                  .map(
-                    (j) => `<button class="attention-row" ${go(`jobs/${j.name}`)}>
-                <span class="status-icon ${j.status === "failing" ? "" : "warn"}">${j.status === "failing" ? "!" : "~"}</span>
-                <span><strong>${esc(j.name)}</strong><p>${esc(j.owner)} · ${j.failures} failures in ${j.runs} recorded runs</p></span>
-                <span class="age">open →</span></button>`
-                  )
-                  .join("")
-              : `<div class="empty">Nothing is failing and nothing is past its cadence.</div>`
-          }</div>
+          <p class="metric-note">The queue is built once, ranked by consequence, and every row
+          carries its own next action. This panel deliberately does <strong>not</strong> restate it:
+          a second copy built from a second rule is how one estate ends up reporting
+          558 things needing attention when three were incidents.</p>
+          <button class="act-btn open" ${go("now")} style="margin-top:14px">
+            ${queued ? `Open the queue — ${queued} waiting` : "Open the queue — nothing waiting"} →</button>
         </div>
       </section>
       <section class="panel" data-tour="verdicts">
@@ -370,6 +509,24 @@ function renderVerifiedEvent(state) {
       ${nameTable(worked, "Where it worked", "The evidence under the rate — select a row for the episode.")}
       ${nameTable(failed, "Where it failed", "The worst miss is the strategy's real risk, so it is given equal billing.")}
     </div>
+
+    ${disclosure(
+      "Every episode of this event type",
+      `<table class="jobs-table"><thead><tr><th>Stock</th><th>Signal date</th><th>5d vs SPY</th><th>10d vs SPY</th><th>20d vs SPY</th></tr></thead><tbody>${sorted
+        .map(
+          (n) => `<tr class="clickable" ${go(`verified/${ev}/${n.ticker}~${n.date}`)}>
+        <td><strong>${esc(n.ticker)}</strong></td><td>${esc(n.date)}</td>
+        ${["5", "10", "20"]
+          .map((h) => {
+            const x = n.horizons[h];
+            if (!x || x.state !== "resolved") return `<td class="n pending">pending</td>`;
+            return `<td class="n ${tone(-x.rel)}">${signed(x.rel)}</td>`;
+          })
+          .join("")}</tr>`
+        )
+        .join("")}</tbody></table>`,
+      sorted.length
+    )}
 
     ${caveat(
       "A hit rate is an average, and an average over these episodes can be one name carrying it or eighty behaving alike. These are the rows underneath it; two episodes on one ticker are two separate calls, not a duplicate."
@@ -740,7 +897,7 @@ function renderStrategyDetail(state) {
 function renderJobs(state) {
   if (state.key) return renderJobDetail(state);
   const owners = [...new Set(D.jobs.map((j) => j.owner))].sort();
-  const counts = { failing: 0, stale: 0, healthy: 0 };
+  const counts = { failing: 0, stale: 0, healthy: 0, retired: 0 };
   D.jobs.forEach((j) => counts[j.status]++);
   const filter = state.q || "all";
   const list = D.jobs.filter((j) => filter === "all" || j.status === filter);
@@ -750,7 +907,9 @@ function renderJobs(state) {
     "Every workflow is judged against its own observed rhythm. A past success expires, lateness is counted in trading sessions rather than hours, and silence is never green.",
     `
     ${insight(
-      `${counts.failing} failing and ${counts.stale} past cadence, out of ${D.jobs.length}.`,
+      `${counts.failing} failing and ${counts.stale} past cadence, out of ${
+        D.jobs.length - (counts.retired || 0)
+      } live jobs${counts.retired ? ` — ${counts.retired} more are retired names` : ""}.`,
       "The dominant failure mode is not a red row nobody fixed — it is a green one. A watcher keyed on <em>status == failure</em> would say nothing about a job that last recorded success ninety-six days ago."
     )}
     <div class="toolbar">
@@ -759,6 +918,7 @@ function renderJobs(state) {
         <button class="chip ${filter === "failing" ? "active" : ""}" ${go("jobs?failing")}>Failing ${counts.failing}</button>
         <button class="chip ${filter === "stale" ? "active" : ""}" ${go("jobs?stale")}>Past cadence ${counts.stale}</button>
         <button class="chip ${filter === "healthy" ? "active" : ""}" ${go("jobs?healthy")}>Healthy ${counts.healthy}</button>
+        <button class="chip ${filter === "retired" ? "active" : ""}" ${go("jobs?retired")}>Retired ${counts.retired}</button>
       </div>
       <input class="inline-search" id="job-search" placeholder="Filter ${list.length} jobs" aria-label="Filter jobs">
     </div>
@@ -766,11 +926,14 @@ function renderJobs(state) {
     <section class="panel" data-tour="heatmap">
       <div class="panel-head"><div><h2>One square per job, grouped by owner</h2>
         <p>Thirty-eight collapsible tables meant holding the answer in your head. The concentration is the finding.</p></div>
-        <div class="legend-dots"><span><i class="ok"></i>healthy</span><span><i class="late"></i>past cadence</span><span><i class="fail"></i>failing</span></div></div>
+        <div class="legend-dots"><span><i class="ok"></i>healthy</span><span><i class="late"></i>past cadence</span><span><i class="fail"></i>failing</span><span><i class="ret"></i>retired</span></div></div>
       <div class="panel-body"><div class="heatmap">${owners
         .map((o) => {
           const items = D.jobs.filter((j) => j.owner === o);
-          const issues = items.filter((j) => j.status !== "healthy").length;
+          /* Retired is not an issue. A renamed job whose successor is
+           * healthy is work that moved, not work that stopped, so counting it
+           * here painted whole groups amber for nothing being wrong. */
+          const issues = items.filter((j) => j.status !== "healthy" && j.status !== "retired").length;
           return `<div class="heat-group"><span class="heat-label">${esc(o)}<b class="${issues ? "warn" : ""}">${issues ? `${issues} of ${items.length}` : items.length}</b></span>
           <div class="heat-cells">${items
             .map(
@@ -781,11 +944,12 @@ function renderJobs(state) {
         .join("")}</div></div>
     </section>
 
-    <section class="panel">
-      <div class="panel-head"><div><h2>Exceptions first</h2><p>Groups with nothing wrong sort last, so the page is as long as the number of problems.</p></div></div>
-      <table class="jobs-table"><thead><tr><th>Workflow</th><th>Status</th><th>Reliability</th><th>Failures</th><th>Last run</th></tr></thead>
-      <tbody id="job-rows">${jobRows(list)}</tbody></table>
-    </section>`,
+    ${disclosure(
+      "Every job, row by row — exceptions first",
+      `<table class="jobs-table"><thead><tr><th>Workflow</th><th>Status</th><th>Reliability</th><th>Failures</th><th>Last run</th></tr></thead>
+       <tbody id="job-rows">${jobRows(list)}</tbody></table>`,
+      list.length
+    )}`,
     `${D.jobs.length} health-reporting jobs · ${D.scale.loaded} of ${D.scale.agents} agents loaded`
   )}`;
 }
@@ -1384,9 +1548,30 @@ function renderAgent() {
   )}`;
 }
 
+/* One sentence per screen saying what it is *for*, as against what happens to
+ * be true on it today. Shown in Overview mode; the production console carries
+ * the same table and shows it under the title at all times. */
+const PURPOSE = {
+  now: "Everything that needs a decision, ranked by consequence, each row carrying where it lives and what to do about it.",
+  changed: "What moved since the last completed market session — the daily question a page showing only <em>now</em> cannot answer.",
+  dashboard: "The size and standing of the estate: how much is registered, how much is running, and how much of it has earned the right to be ranked.",
+  verified: "Whether the signals this system published turned out to be right, graded against the benchmark you could have owned instead.",
+  books: "Every strategy run forward as its own $25,000 book on one execution model, so their results are comparable with each other.",
+  strategies: "The register: what exists, what lifecycle stage it is at, and whether anything is watching it.",
+  jobs: "Whether the automation is actually running, judged against each job's own rhythm rather than one global threshold.",
+  portfolio: "What the book holds, what changed, where its evidence disagrees with itself, and what that concentration really is.",
+  analyzer: "One company at a time, with each research layer kept separate and allowed to return nothing.",
+  matrix: "A completed market session as one picture, with the constituents one level under every tile.",
+  seasonality: "What the calendar likes, what the tape likes, and the names where those two halves disagree.",
+  reports: "Every registered artifact, aged against its own cadence rather than a single staleness rule.",
+  agent: "A read-only assistant over the evidence on this platform. It can explain and it cannot act.",
+};
+
 /* ----------------------------------------------------------------- router */
 const views = {
-  dashboard: { title: "What to look at today", eyebrow: "Action queue · operating view", render: renderDashboard },
+  now: { title: "What needs a decision", eyebrow: "Front door · ranked by consequence", render: renderNow },
+  changed: { title: "What changed", eyebrow: "Since the last completed session", render: renderChanged },
+  dashboard: { title: "Platform dashboard", eyebrow: "Scale and standing · operating view", render: renderDashboard },
   verified: { title: "Were they right?", eyebrow: "Signal verification · measured outcomes", render: renderVerified },
   books: { title: "Forward tests", eyebrow: "One execution model · hypothetical books", render: renderBooks },
   strategies: { title: "Strategies", eyebrow: "Lifecycle registry", render: renderStrategies },
@@ -1408,7 +1593,31 @@ function parseHash() {
   const raw = location.hash.slice(1);
   const [path, q] = raw.split("?");
   const [view, key, sub] = path.split("/").map((x) => (x ? decodeURIComponent(x) : undefined));
-  return { view: views[view] ? view : "dashboard", key, sub, q };
+  return { view: views[view] ? view : "now", key, sub, q };
+}
+
+/* Operator is the default and the owner's view: the queue, dense, unexplained.
+ * Overview is for someone who has never seen this — it promotes the one-line
+ * purpose every screen already carries. Deliberately not a second console. */
+let MODE = "operator";
+try {
+  MODE = localStorage.getItem("cc_mode") === "overview" ? "overview" : "operator";
+} catch (e) {
+  /* A blocked or cleared store degrades to Operator rather than breaking boot. */
+}
+
+function setMode(next) {
+  MODE = next;
+  try {
+    localStorage.setItem("cc_mode", next);
+  } catch (e) {
+    /* Per-viewer convenience only; the page must render correctly without it. */
+  }
+  document.body.dataset.mode = next;
+  document.querySelectorAll("[data-mode-btn]").forEach((b) =>
+    b.classList.toggle("on", b.dataset.modeBtn === next)
+  );
+  render();
 }
 
 function render() {
@@ -1419,7 +1628,26 @@ function render() {
   document.getElementById("page-title").textContent = view.title;
   document.getElementById("page-eyebrow").textContent = view.eyebrow;
   const root = document.getElementById("view-root");
-  root.innerHTML = view.render(state);
+  /* Overview *adds* the purpose line; Operator does not subtract anything.
+   * Hiding each screen's description in Operator mode would have buried
+   * load-bearing caveats — "a bearish claim is correct when the price falls"
+   * is not decoration. */
+  const lead = MODE === "overview" && PURPOSE[state.view] && !state.key
+    ? `<p class="purpose"><b>What this screen is for.</b> ${PURPOSE[state.view]}</p>`
+    : "";
+  /* A view that throws must cost its own screen, never the console. */
+  try {
+    root.innerHTML = lead + view.render(state);
+  } catch (err) {
+    root.innerHTML = `<div class="insight"><strong>This screen could not be built.</strong>
+      <p>${esc(err && err.message ? err.message : String(err))} — the rest of the console is unaffected.
+      Everything else is still reachable from the rail or ⌘K.</p></div>`;
+  }
+  document.body.dataset.mode = MODE;
+  /* Any navigation closes the palette, not just a click on one of its own
+   * results. Hooked to a result click alone, the back button and a pasted URL
+   * both left it open over whichever screen you had just arrived at. */
+  if (typeof closeSearch === "function") closeSearch();
   bindLocal(state);
   if (window.TOUR) window.TOUR.onRender(state);
   document.querySelector(".sidebar").classList.remove("open");
@@ -1437,6 +1665,28 @@ window.navigate = navigate;
 
 /* One delegated handler for every drill-down on every screen. */
 document.addEventListener("click", (event) => {
+  const mode = event.target.closest("[data-mode-btn]");
+  if (mode) {
+    setMode(mode.dataset.modeBtn);
+    return;
+  }
+  /* Copying is the honest alternative to a button this console cannot honour:
+   * nothing here runs a job, so the row hands over the exact command instead. */
+  const copy = event.target.closest("[data-copy]");
+  if (copy) {
+    const text = copy.dataset.copy;
+    const done = () => {
+      copy.classList.add("copied");
+      toast("Command copied — paste it in the repository root");
+      setTimeout(() => copy.classList.remove("copied"), 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, () => toast(text));
+    } else {
+      toast(text);
+    }
+    return;
+  }
   const target = event.target.closest("[data-go]");
   if (!target) return;
   event.preventDefault();
@@ -1503,39 +1753,138 @@ function toast(message) {
 window.toast = toast;
 
 /* Search is a palette, not an injector: results never rewrite the screen you
- * are reading to answer a question about a different one. */
+ * are reading to answer a question about a different one.
+ *
+ * Since the rail is not shrinking, the palette has to be good enough that the
+ * rail is not how you navigate — so it indexes every screen, every sub-tab and
+ * every named thing underneath them, and each result says which kind it is. */
+const SUBTABS = {
+  books: ["overview", "contract", "trades"],
+  portfolio: ["book", "changed", "risk", "outlook"],
+  analyzer: ["valuation", "quality", "forecast", "thesis"],
+};
 const INDEX = [
-  ...Object.entries(views).map(([k, v]) => ({ label: v.title, group: "Screen", path: k })),
-  ...D.strategies.map((s) => ({ label: s.name, group: "Strategy", path: `strategies/${s.key}` })),
-  ...D.books.map((b) => ({ label: b.name || b.key, group: "Book", path: `books/${b.key}` })),
+  ...Object.entries(views).map(([k, v]) => ({ label: v.title, hint: v.eyebrow, group: "Screen", path: k })),
+  ...Object.entries(SUBTABS).flatMap(([view, subs]) =>
+    subs.map((s) => ({ label: `${views[view].title} · ${titled(s)}`, hint: "sub-view", group: "Screen", path: `${view}/${s}` }))
+  ),
+  ...D.strategies.map((s) => ({ label: s.name, hint: `${s.stage} · ${s.family}`, group: "Strategy", path: `strategies/${s.key}` })),
+  ...D.books.map((b) => ({ label: b.name || b.key, hint: `${b.track} · ${b.sessions} sessions`, group: "Book", path: `books/${b.key}` })),
   ...D.verification.rows
     .filter((r) => r.horizon === 10)
-    .map((r) => ({ label: titled(r.event_type), group: "Signal", path: `verified/${r.event_type}` })),
-  ...D.jobs.slice(0, 60).map((j) => ({ label: j.name, group: "Job", path: `jobs/${j.name}` })),
-  ...COMPANIES.map((c) => ({ label: `${c[0]} — ${c[1]}`, group: "Company", path: `analyzer/${c[0]}` })),
+    .map((r) => ({ label: titled(r.event_type), hint: `${r.direction} · ${r.verdict}`, group: "Signal", path: `verified/${r.event_type}` })),
+  ...D.jobs.map((j) => ({ label: j.name, hint: `${j.owner} · ${j.status}`, group: "Job", path: `jobs/${j.name}` })),
+  ...COMPANIES.map((c) => ({ label: `${c[0]} — ${c[1]}`, hint: c[2], group: "Company", path: `analyzer/${c[0]}` })),
+  ...HOLDINGS.map((h) => ({ label: h[0], hint: `${h[1]} · ${h[2].toFixed(1)}% of the book`, group: "Holding", path: `portfolio/holding/${h[0]}` })),
+  ...INDUSTRIES.map((i) => ({ label: i[0], hint: "industry", group: "Breadth", path: `matrix/${i[0]}` })),
 ];
 
 const search = document.getElementById("global-search");
 const results = document.getElementById("search-results");
-search.addEventListener("input", () => {
+const paletteEl = document.getElementById("palette");
+let hits = [];
+let cursor = -1;
+
+const GROUP_ORDER = ["Screen", "Strategy", "Book", "Signal", "Job", "Holding", "Company", "Breadth"];
+
+function paintResults() {
+  /* Grouped, because a flat list mixing screens, strategies, books, jobs,
+   * signals and holdings makes you read the kind column to know what you are
+   * even looking at. */
+  const grouped = GROUP_ORDER.map((g) => [g, hits.filter((h) => h.group === g)]).filter(
+    ([, rows]) => rows.length
+  );
+  results.innerHTML = hits.length
+    ? grouped
+        .map(
+          ([g, rows]) =>
+            `<p class="pal-group">${esc(g)}</p>` +
+            rows
+              .map((x) => {
+                const i = hits.indexOf(x);
+                return `<button class="search-result" role="option" id="pal-${i}" aria-selected="${i === cursor}" ${go(x.path)}><span>${esc(x.label)}<small class="hint">${esc(x.hint || "")}</small></span><small class="kind">${esc(g)}</small></button>`;
+              })
+              .join("")
+        )
+        .join("")
+    : `<p class="pal-none">${
+        search.value.trim()
+          ? `Nothing matches “${esc(search.value.trim())}”.`
+          : "Every screen, sub-view, strategy, book, job, signal type, holding and industry is reachable from here."
+      }</p>`;
+  /* The combobox already declared `aria-activedescendant`; without this the
+   * ARIA contract was a promise the markup did not keep. */
+  if (cursor >= 0) search.setAttribute("aria-activedescendant", `pal-${cursor}`);
+  else search.removeAttribute("aria-activedescendant");
+  search.setAttribute("aria-expanded", String(hits.length > 0));
+}
+
+function runSearch() {
   const q = search.value.trim().toLowerCase();
-  const hits = q ? INDEX.filter((x) => x.label.toLowerCase().includes(q)).slice(0, 8) : [];
-  results.hidden = !hits.length;
-  results.innerHTML = hits
-    .map((x) => `<button class="search-result" ${go(x.path)}><span>${esc(x.label)}</span><small>${x.group}</small></button>`)
-    .join("");
-});
-results.addEventListener("click", () => {
+  hits = q
+    ? INDEX.filter((x) => (x.label + " " + (x.hint || "")).toLowerCase().includes(q))
+        .sort((a, b) => a.label.toLowerCase().indexOf(q) - b.label.toLowerCase().indexOf(q))
+        .slice(0, 12)
+        /* `hits` must be in *rendered* order, because the cursor is an index
+         * into it and the rows are drawn grouped. Sorted by relevance alone,
+         * selecting index 0 highlighted whichever row happened to sit seventh
+         * on screen, and the arrow keys walked an order nobody could see. */
+        .sort((a, b) => GROUP_ORDER.indexOf(a.group) - GROUP_ORDER.indexOf(b.group))
+    : [];
+  cursor = hits.length ? 0 : -1;
+  paintResults();
+}
+
+function openPalette() {
+  paletteEl.hidden = false;
   search.value = "";
-  results.hidden = true;
+  runSearch();
+  search.focus();
+}
+
+function closeSearch() {
+  hits = [];
+  cursor = -1;
+  paletteEl.hidden = true;
+  search.removeAttribute("aria-activedescendant");
+  search.setAttribute("aria-expanded", "false");
+}
+
+search.addEventListener("input", runSearch);
+document.getElementById("search-trigger").addEventListener("click", openPalette);
+paletteEl.addEventListener("click", (event) => {
+  if (event.target.closest("[data-palette-close], [data-go]")) closeSearch();
 });
+
+search.addEventListener("keydown", (event) => {
+  if (!hits.length) return;
+  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    event.preventDefault();
+    cursor = (cursor + (event.key === "ArrowDown" ? 1 : hits.length - 1)) % hits.length;
+    paintResults();
+  } else if (event.key === "Enter" && cursor >= 0) {
+    event.preventDefault();
+    const target = hits[cursor].path;
+    search.value = "";
+    closeSearch();
+    search.blur();
+    navigate(target);
+  }
+});
+
 document.addEventListener("keydown", (event) => {
+  const typing = /^(INPUT|TEXTAREA)$/.test((event.target && event.target.tagName) || "");
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
     event.preventDefault();
-    search.focus();
+    openPalette();
+  } else if (event.key === "/" && !typing && !event.metaKey && !event.ctrlKey) {
+    /* `/` is how every other operator console opens its search, and it costs
+     * nothing — but only when the caret is not already in a field. */
+    event.preventDefault();
+    openPalette();
   }
   if (event.key === "Escape") {
-    results.hidden = true;
+    closeSearch();
     search.blur();
   }
 });
@@ -1546,5 +1895,28 @@ document.getElementById("mobile-nav").addEventListener("click", (event) => {
   event.currentTarget.setAttribute("aria-expanded", String(sidebar.classList.contains("open")));
 });
 
+/* Rail badges are inventory, not alarms: they say how many things are in there,
+ * which is why the queue's count and the Changed count are written as plain
+ * numbers and the fault state is carried by the row itself. */
+function paintBadges() {
+  const queued = (D.queue || []).length;
+  const moved = (D.changed && D.changed.groups || []).reduce((a, g) => a + g.rows.length, 0);
+  const nowBadge = document.getElementById("nav-now");
+  const chBadge = document.getElementById("nav-changed");
+  if (nowBadge) nowBadge.textContent = queued ? String(queued) : "clear";
+  if (chBadge) chBadge.textContent = String(moved);
+  const item = document.querySelector('[data-view="now"]');
+  if (queued && item && !document.querySelector('[data-view="now"] .alert-dot')) {
+    const i = document.createElement("i");
+    i.className = "alert-dot";
+    item.appendChild(i);
+  }
+}
+
+document.querySelectorAll("[data-mode-btn]").forEach((b) =>
+  b.classList.toggle("on", b.dataset.modeBtn === MODE)
+);
+document.body.dataset.mode = MODE;
+paintBadges();
 window.addEventListener("hashchange", render);
 render();

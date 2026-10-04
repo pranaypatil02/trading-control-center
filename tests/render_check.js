@@ -45,6 +45,7 @@ function El(tag) {
     get textContent() { return self._html; },
     setAttribute(k, v) { self.attributes[k] = String(v); },
     getAttribute(k) { return self.attributes[k]; },
+    removeAttribute(k) { delete self.attributes[k]; },
     addEventListener() {},
     appendChild(c) { self.children.push(c); return c; },
     querySelector() { return null; },
@@ -62,7 +63,8 @@ function El(tag) {
 const ids = {};
 ["global-search", "search-results", "page-title", "page-eyebrow", "view-root", "toast",
  "mobile-nav", "tour-button", "job-search", "strategy-search", "agent-form", "agent-question",
- "job-rows"].forEach((id) => (ids[id] = El("div")));
+ "job-rows", "palette", "search-trigger", "nav-now", "nav-changed"]
+  .forEach((id) => (ids[id] = El("div")));
 
 const navItems = [];
 global.document = {
@@ -126,6 +128,7 @@ load("app.js");
 load("tour.js");
 
 const D = global.window.DEMO;
+const CLASS_OK = ["positions", "integrity", "reporting"];
 const render = () => {
   for (const fn of listeners.hashchange || []) fn();
 };
@@ -134,6 +137,8 @@ const render = () => {
 const paths = [];
 const push = (p) => paths.push(p);
 
+push("now");
+push("changed");
 push("dashboard");
 push("verified");
 D.verification.rows
@@ -155,7 +160,7 @@ push("strategies");
 ["paper", "signal", "study", "system"].forEach((s) => push(`strategies?${s}`));
 D.strategies.forEach((s) => push(`strategies/${s.key}`));
 push("jobs");
-["failing", "stale", "healthy"].forEach((s) => push(`jobs?${s}`));
+["failing", "stale", "healthy", "retired"].forEach((s) => push(`jobs?${s}`));
 D.jobs.forEach((j) => push(`jobs/${j.name}`));
 ["book", "changed", "risk", "outlook"].forEach((t) => push(`portfolio/${t}`));
 ["ALPH", "BRVO", "CDEL", "DRFT", "EVOK", "FLUX", "GRID", "HELM", "IRIS", "JOLT"].forEach((t) =>
@@ -194,7 +199,7 @@ for (const p of paths) {
 /* --------------------------------------------------------- invariants */
 /* Every analytical surface must state its conclusion above its evidence —
  * the same rule the production console is pinned to. */
-const CONCLUDES = ["verified", "books", "strategies", "jobs", "matrix", "seasonality", "reports"];
+const CONCLUDES = ["now", "changed", "verified", "books", "strategies", "jobs", "matrix", "seasonality", "reports"];
 for (const p of CONCLUDES) {
   global.location.hash = `#${p}`;
   render();
@@ -228,6 +233,90 @@ D.books.filter((b) => b.allow_short).forEach((b) => {
   if (!b.stop_loss_pct) fail(`${b.key} is a short book with no declared stop`);
 });
 
+/* ---- the walk must not be able to shrink to nothing --------------------- */
+/* The episode paths below are built *from the data*, so an export that drops
+ * every episode simply tests fewer paths and still passes. That happened: one
+ * mis-named key emptied the set and this file reported all clear. A harness
+ * whose coverage is data-driven has to assert its own denominator. */
+if (D.verification.names.length < 50)
+  fail(`only ${D.verification.names.length} episodes exported — the drill-down is effectively untested`);
+const eventsWithEpisodes = new Set(D.verification.names.map((n) => n.event));
+["NEW_52W_LOW", "BREAKOUT_FAILED", "SMA20_RECLAIM", "REVERSAL_50"].forEach((ev) => {
+  if (!eventsWithEpisodes.has(ev)) fail(`event type ${ev} exported no episodes to drill into`);
+});
+if (D.books.length < 10) fail(`only ${D.books.length} books exported`);
+if (D.jobs.length < 50) fail(`only ${D.jobs.length} jobs exported`);
+if (D.strategies.length < 50) fail(`only ${D.strategies.length} strategies exported`);
+
+/* ---- the queue is a decision list, not a status list -------------------- */
+/* A row that names a problem and offers nothing to do about it is the fault
+ * this whole refinement exists to fix, so it is an invariant rather than a
+ * convention. */
+global.location.hash = "#now";
+render();
+const nowHtml = ids["view-root"].innerHTML;
+const queue = D.queue || [];
+if (queue.length) {
+  queue.forEach((r) => {
+    if (!r.action) fail(`queue row "${r.what}" carries no next action`);
+    if (!r.where) fail(`queue row "${r.what}" says nothing about where it lives`);
+    if (r.action && !["command", "route", "open"].includes(r.action.kind))
+      fail(`queue row "${r.what}" invents a fourth action kind: ${r.action.kind}`);
+    if (r.action && r.action.kind === "command" && !r.action.value)
+      fail(`queue row "${r.what}" offers to copy a command it does not carry`);
+    if (!CLASS_OK.includes(r.cls)) fail(`queue row "${r.what}" has no consequence class`);
+  });
+  const buttons = (nowHtml.match(/class="act-btn/g) || []).length;
+  if (buttons < queue.length) fail(`${queue.length} queue rows rendered only ${buttons} actions`);
+  /* Ranked by consequence, not by age. */
+  const order = queue.map((r) => CLASS_OK.indexOf(r.cls));
+  if (order.some((v, i) => i && v < order[i - 1])) fail("the queue is not ordered by consequence");
+} else if (!/good-empty/.test(nowHtml)) {
+  fail("an empty queue must say so explicitly, not render nothing");
+}
+/* A command that reaches the published page must be runnable by someone who is
+ * not on this machine. */
+queue.forEach((r) => {
+  if (r.action && r.action.kind === "command" && /^\//.test(r.action.value))
+    fail(`queue row "${r.what}" publishes an absolute path as its command`);
+});
+
+/* ---- the delta names its window and refuses the ones it cannot answer --- */
+global.location.hash = "#changed";
+render();
+const chHtml = ids["view-root"].innerHTML;
+const win = (D.changed || {}).window || {};
+if (!win.from || !win.to) fail("the Changed view has no window to compare");
+if (!chHtml.includes(win.from) || !chHtml.includes(win.to))
+  fail("the Changed view does not name the window it is showing");
+if (!((D.changed || {}).refused || []).length)
+  fail("the Changed view refuses no window — at least the unanswerable one must be named");
+((D.changed || {}).groups || []).forEach((g) => {
+  if (!g.population) fail(`Changed group "${g.key}" states no population`);
+  if (!g.rows.length && !chHtml.includes("good-empty"))
+    fail(`Changed group "${g.key}" is empty and renders no explicit empty state`);
+});
+
+/* Exactly one screen builds the queue. The dashboard used to build its own from
+ * a different rule, which is how one estate came to report 558 things needing
+ * attention when three were incidents. */
+const builders = [];
+for (const p of ["now", "changed", "dashboard", "jobs", "books", "strategies"]) {
+  global.location.hash = `#${p}`;
+  render();
+  if (ids["view-root"].innerHTML.includes('class="jobs-table queue"')) builders.push(p);
+}
+if (builders.length !== 1 || builders[0] !== "now")
+  fail(`the queue is built on ${builders.length} screens (${builders.join(", ")}) — it must be exactly one`);
+
+/* A job retired into a healthy successor must never be queued — seven ghosts
+ * once filled this queue while their replacements ran fine every morning. */
+const retiredNames = new Set(D.jobs.filter((j) => j.status === "retired").map((j) => j.name));
+queue.forEach((r) => {
+  const name = r.id && r.id.startsWith("job:") ? r.id.slice(4) : null;
+  if (name && retiredNames.has(name)) fail(`retired job "${name}" is in the queue`);
+});
+
 /* Every tour step must land on a path this prototype can render. */
 const tourSteps = fs.readFileSync(path.join(DOCS, "tour.js"), "utf8");
 const stepPaths = [...tourSteps.matchAll(/path:\s*"([^"]+)"/g)].map((m) => m[1]);
@@ -245,13 +334,28 @@ for (const p of stepPaths) {
 }
 /* A step that highlights a selector the screen does not emit shows an empty
  * ring and reads as a broken tour. */
-const focusSel = [...tourSteps.matchAll(/path:\s*"([^"]+)",[\s\S]*?focus:\s*"([^"]+)"/g)];
+/* A step may legitimately spotlight page chrome (the palette trigger, the mode
+ * switch) rather than something the view rendered, so the shell counts too. */
+const shellHtml = fs.readFileSync(path.join(DOCS, "index.html"), "utf8");
+/* `(?!path:)` keeps the match inside one step. Without it a step whose focus is
+ * null ran on to the *next* step's selector and checked it against the wrong
+ * screen — a false failure that looks exactly like a real one. */
+const focusSel = [...tourSteps.matchAll(/path:\s*"([^"]+)",(?:(?!path:)[\s\S])*?focus:\s*["']([^"']+)["']/g)];
 for (const [, p, sel] of focusSel) {
   global.location.hash = `#${p}`;
   render();
-  const html = ids["view-root"].innerHTML;
-  const token = sel.startsWith("[data-tour") ? sel.slice(1, -1) : sel.replace(/^\./, 'class="');
-  if (!html.includes(token.split("=")[0])) fail(`walkthrough step #${p} highlights "${sel}", which that screen does not emit`);
+  const html = ids["view-root"].innerHTML + shellHtml;
+  /* Checked exactly, per selector kind. An earlier version reduced every
+   * selector to the text before its first "=", which turned `#anything` into
+   * the string "id" — present in any HTML, so the check passed for a selector
+   * nothing emitted. */
+  let present;
+  if (sel.startsWith("[")) present = html.includes(sel.slice(1, -1));
+  else if (sel.startsWith("#")) present = html.includes(`id="${sel.slice(1)}"`);
+  else if (sel.startsWith(".")) present = new RegExp(`class="[^"]*\\b${sel.slice(1)}\\b`).test(html);
+  else present = html.includes(sel);
+  if (!present)
+    fail(`walkthrough step #${p} highlights "${sel}", which neither that screen nor the shell emits`);
 }
 
 /* Nothing private may reach a public artifact. */
