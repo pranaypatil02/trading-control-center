@@ -1,39 +1,150 @@
 # Automated Trading Research & Operations Platform
 
-I designed and built an end-to-end product for developing, validating, and
-operating systematic equity and options strategies. It brings market and
-fundamental data, point-in-time research, backtesting, paper execution,
-scheduling, monitoring, reporting, and evidence-grounded AI research into one
-platform.
+I am the **product manager and sole builder** of an end-to-end platform for
+developing, validating, and operating systematic equity and options strategies.
+It brings market and fundamental data, point-in-time research, backtesting,
+paper execution, scheduling, monitoring, reporting, and evidence-grounded AI
+research into one product.
 
 The **Trading Control Center** shown here is the platform's operating interface,
 not the whole product.
 
 | Platform scale | Current footprint |
 |---|---:|
-| Registered strategies and research studies | **40 across 7 families** |
-| Automated operations | **72 health-reporting jobs · 65 scheduled agents** |
-| Historical market data | **114.5M options minute bars · 6.6M daily-price rows** |
-| Codebase | **269K tracked Python lines · 194K implementation/research + 75K tests** |
-| Verification | **4,200+ tests across 250 test files** |
-| External systems | **12+ market-data, brokerage, filing, research, and alert integrations** |
+| Registered strategies and research studies | **69 across 7 families** |
+| Automated operations | **108 health-reporting jobs · 88 scheduled agents (80 loaded)** |
+| Forward-tested strategy books | **14 on one execution model** |
+| Historical market data | **114.5M options minute bars · 6.85M daily-price rows** |
+| Codebase | **380K tracked Python lines · 269K implementation/research + 110K tests** |
+| Verification | **6,655 tests across 338 test files, run as a release gate** |
+| External systems | **14 market-data, brokerage, filing, research, and alert integrations** |
 
-This repository holds **screenshots and design notes only**. The implementation
-is private.
+This repository holds **the interactive prototype, screenshots, and design
+notes**. The implementation is private.
 
-## Try the interactive product demo
+## Try the interactive prototype
 
-[**Open the high-fidelity Control Center demo →**](https://pranaypatil02.github.io/trading-control-center/)
+[**Open the Trading Control Center prototype →**](https://pranaypatil02.github.io/trading-control-center/)
 
-The demo is a purpose-built, read-only showcase with synthetic data. It mirrors
-the current product's information architecture and interaction model without
-publishing strategy code, live positions, account values, credentials, or
-private infrastructure details. Use the left navigation, global search, job
-filters, chart ranges, and interactive market-breadth tiles.
+Not a screenshot gallery — a working, dependency-free prototype of the real
+console. **Every screen is clickable and every screen has at least one level
+beneath it**, so you can go from a headline verdict to the event type behind it
+to the individual stock that produced it:
+
+| Start here | One level down | Two levels down |
+|---|---|---|
+| Signal verification — did the published signals work? | Any of 13 event types, with its interval and verdict | A single episode, graded at 5, 10 and 20 sessions |
+| Forward tests — 14 hypothetical $25,000 books | A book's performance, contract, trades and costs | Why that book can or cannot be ranked |
+| Strategy registry — 69 strategies by lifecycle stage | A strategy's workspace, jobs and attached book | The run history of any job behind it |
+| Bots & jobs — one square per job, grouped by owner | A job's reliability strip and alerting rules | — |
+| Portfolio · analyzer · breadth · seasonality | Holding, company, industry and candidate detail | Per-layer evidence, with its polarity |
+
+**▶ Guided walkthrough.** A 14-step narrated tour drives the prototype through
+one path — each step navigates to a real screen and highlights the thing being
+discussed — so a demo is reproducible rather than remembered. Press the button
+in the header, or arrow-key through it. Every step is a real URL, so a viewer
+can stop at any point and keep exploring from there.
+
+Research figures in the prototype are the platform's **own measured output**.
+Portfolio balances, the breadth tiles and the analyzer companies are synthetic,
+and the banner says so persistently. No strategy code, live position, account
+value, credential, local path, or order control is published.
 
 [![Latest sanitized Platform Dashboard](screenshots/23-platform-dashboard-latest.png)](https://pranaypatil02.github.io/trading-control-center/)
 
-Click the screenshot to open the interactive version.
+<table>
+  <tr>
+    <td width="50%"><a href="https://pranaypatil02.github.io/trading-control-center/#verified/NEW_52W_LOW"><img src="screenshots/33-drilldown-event-detail.png" alt="Two levels down: one signal type, every horizon, and the stocks where it worked and failed"></a></td>
+    <td width="50%"><img src="screenshots/34-guided-walkthrough.png" alt="The guided walkthrough highlighting the action queue, with step controls"></td>
+  </tr>
+  <tr>
+    <td><b>Two levels down, and it is a URL.</b> One signal type, each horizon with its interval against a coin flip, and the stocks underneath the rate — <i>where it failed</i> given equal billing, because the worst miss is the strategy's real risk.</td>
+    <td><b>A demo you can rehearse.</b> Fourteen steps, each navigating to a real screen and spotlighting the element under discussion. Arrow keys work; Escape leaves you wherever the tour had got to.</td>
+  </tr>
+</table>
+
+Two harnesses gate the deploy, so a broken prototype cannot reach the published
+URL. `node tests/render_check.js` drives all **315 routes** and all 14
+walkthrough steps under a DOM shim, asserts that every analytical screen states
+its conclusion above its first table, and fails if a private path or
+credential-shaped string reaches `docs/` — it caught a leaked local file path on
+its first run. `python3 tests/browser_check.py` then drives Chromium over the
+built artifact for the things only a browser can answer: that a two-level
+drill-down navigates by clicking, that the browser's own back button returns to
+the level above, that the walkthrough advances and draws its spotlight, and that
+no screen overflows or clips a table at 390px. That last assertion found one
+too — wide tables were being clipped by their own panel rather than scrolled, so
+the right-hand columns were unreachable on a phone with nothing indicating they
+existed.
+
+---
+
+## My role as product manager
+
+I own the product, not only the code. The hard problems here were not
+engineering problems — they were decisions about **what a number is allowed to
+claim**, and most of this platform's distinctive behaviour exists because a
+plausible-looking metric was refused.
+
+**Problem framing over feature requests.** The original ask was "more
+strategies". The actual problem was the lifecycle: an idea had no path to a
+point-in-time backtest, a good backtest quietly became a bot, and a bot that
+stopped months ago still looked healthy. Every major surface here answers a
+stage of that lifecycle rather than a feature request.
+
+**I write the evidence policy, and it has teeth.** *Correct means beat the
+benchmark.* *A warning is correct when the price falls.* *Opposite claims are
+never pooled.* *One qualification episode counts once.* *Pending is not a miss.*
+Each of those is a product decision with a measurable consequence — the first
+draft of the verification screen published a pooled 59% "better than chance"
+headline that **improved as the strategy's bullish calls got worse**. The rule
+is what killed it, not a code review.
+
+**Registration before results.** Strategies are registered — hypothesis, entry,
+exit, sizing, benchmark, and the pass bar — **before** anything is tested, and
+the registration document is checked in. That is why "none of the eight price
+strategies passed" is a finding rather than an embarrassment, and why the
+10-stock winner cohort is labelled *Promising, unproven* at `p=0.109` instead of
+shipping as a 21.9% CAGR strategy.
+
+**Deciding what not to build is half the job.** A 142-section platform spec
+asked for a prediction engine: forecast probabilities, expected returns,
+confidence scores, a prediction leaderboard. I refused it and wrote down why —
+the eight strategies tested on this same data had all returned "no edge", several
+significantly negative out of sample, so probability-positive figures on top of
+it would be the exact failure the rest of the platform exists to prevent. What
+shipped instead was the honest half: **dispersion, not direction**. Institutional
+ownership, a macro dashboard, and options greeks were refused for a simpler
+reason — no local data supports them, and the refusals are published beside the
+roadmap so nobody re-derives them.
+
+**I set the information architecture.** At 69 strategies, eleven flat sections
+were a list to read rather than a structure to navigate. The rail is grouped by
+*what you came to do* — Today, Running, Review, Research — and strategies group
+by **stage** rather than family, because consequence is the axis that matters at
+this size: family files a paper bot that takes positions beside a study that
+renders a page. The landing screen is an **action queue**; it used to open on
+stock picks while seventeen jobs were failing.
+
+**Acceptance criteria are written as refusals.** A book below 63 marked sessions
+does not get a Sharpe ratio. A replay is never ranked against a live-forward
+book. A historical stress replay below a market-value coverage floor is refused
+and the missing holdings are named. A report whose coverage gate fails publishes
+nothing rather than a normal-looking ranking over a partial universe. Each of
+those is a one-line product rule that took a plausible number off a page.
+
+**I define every headline metric.** The same 426 option trades carried three
+different P&L numbers differing by $4,700, so a tile labelled "P&L" was a lie by
+omission that looked like nothing was wrong. Metrics are now a registered key
+plus a basis, and the tooltip is generated from the record — one copy of the
+definition, and a tile cannot render without naming what it was struck on.
+
+**The product's measure of success is a decision, not engagement.** Nothing
+here optimises time on page. The question each screen is graded against is
+whether an operator can move from a verdict to its cause without opening every
+bot — which is why *exceptions open first*, why *"—" means the repo does not
+record it*, and why a negative finding sorts below the rows that have nothing to
+say yet, with the verdict stated above them in words.
 
 ---
 
@@ -98,7 +209,7 @@ flowchart LR
 
 ## The Control Center — one interface for the platform
 
-At 40 strategies, separate report files stopped scaling as a product. The
+At 69 strategies, separate report files stopped scaling as a product. The
 Control Center became the common navigation and operating layer. It answers
 four questions, in order:
 
@@ -227,7 +338,7 @@ what survived validation and how many model paragraphs were discarded. A batch
 cannot silently continue past the human review point or fill evidence gaps with
 invented values.
 
-### Case study — observability for 72 automated jobs
+### Case study — observability for 108 automated jobs
 
 ![Job observability](screenshots/18-job-observability.png)
 
@@ -394,13 +505,75 @@ dividends owed are excluded, and never mix replayed evidence with live-forward
 rankings. Stored outcomes are append-only and rechecked against current adjusted
 prices so a vendor rewrite becomes a visible integrity incident.
 
-**Outcome.** In the first measured window, bearish warnings beat SPY **64.8%**
-of the time after five sessions and **69.1%** after ten; bullish reversal calls
-managed **36.1%** and **29.9%**. The page also shows that the underlying beaten-
-down cohort was already underperforming, preventing the warning rate from being
-presented as pure signal skill. The product therefore keeps the long controls,
-labels the evidence by verdict, and lets future paper results confirm or reject
-the finding instead of promoting the best-looking number.
+**Outcome.** Across **1,872 graded signals** measured through 2026-10-02, the
+split held and widened as the longer windows resolved:
+
+| | 5 sessions | 10 sessions | 20 sessions |
+|---|---:|---:|---:|
+| Reversal evidence **broke down** (bearish) | 62.7% | 68.8% | **73.0%** |
+| Reversal evidence **strengthened** (bullish) | 37.2% | 34.9% | **21.5%** |
+
+Every bearish horizon reads *better than chance* and every bullish horizon reads
+*worse than chance*, with the intervals clear of a coin flip on both sides. The
+strongest single event type is a new 52-week low at **82.0%** after ten sessions.
+
+The page also shows that the underlying beaten-down cohort was **already**
+underperforming — −2.6% against SPY at ten sessions, `t=−4.80` — which prevents
+the warning rate from being presented as pure signal skill. It is published
+beside the result and deliberately not subtracted, because no measured constant
+says what to deflate it by. The product therefore keeps the long controls,
+labels the evidence by verdict, and lets future forward results confirm or
+reject the finding instead of promoting the best-looking number.
+
+### Case study — a dead config field, and the six rules that replaced it
+
+**Problem.** The verification above produced a finding the platform could not
+act on: its most reliable signals were **bearish**, and the forward-test
+framework could only buy. Worse, it looked as though it could do both.
+`allow_short` was declared on the strategy contract *and* on the ledger, passed
+from the engine into the ledger on every call, and **never read by anything**. A
+refusal code for a blocked short sat in the error table with no code able to
+raise it, and the test asserting "every refusal cause is reachable" only checked
+that each string appeared in a hardcoded copy of its own list. A config asking
+for a short book would have silently run a long one and reported the result as
+the strategy's.
+
+**Product decision.** A short is a **negative lot**, so one set of arithmetic
+serves both sides and `equity = cash + position value` stays true with no second
+formula. Six rules hold it up, and each one returns an entirely plausible book
+when it is got wrong:
+
+| Rule | What the obvious alternative produces |
+|---|---|
+| A short is a negative lot | Filtering positions on `> 0` makes a short invisible to the position value, so the book carries the proceeds with no liability against them and reports **borrowed money as profit** |
+| Slippage runs the other way | A short is a *sale*, so it fills below the quote; the long formula hands the book a better price for being on the unpopular side |
+| Realized P&L is entry − exit | Backwards, every winning short reports as a loss of exactly the same size |
+| Short proceeds are not buying power | Shorting $2,500 lifts cash to $27,500; sizing a long off raw cash deploys money the strategy never had — leverage by accident on a book that forbids margin |
+| A short is stopped by a **rise** | The long rule stops a short that is *winning* and lets a losing one run without limit — the one position here whose loss has no upper bound |
+| A short book **must** declare a stop | Refused at construction. Without one a short has no worst case, and its drawdown column states what happened to be true rather than its risk |
+
+**Guardrails.** Four books now run the signal feed, two on each side. The two
+long books were registered **knowing they had failed** — which is this
+platform's practice, since a book cancelled because one month disliked it can
+never produce the evidence that would overturn the month. Replayed and
+live-forward books are never merged into one ranking: merging them ranks a
+multi-year replay against a four-session book, and the ordering becomes a fact
+about who got the longer window.
+
+**And the stocks are named.** Over the measured window the short signals worked
+on defensives and industrials and failed on high-beta technology — the best win
+was **TTD at −17.2%** against SPY, and the worst miss **META at +19.4%**. That
+asymmetry, not the hit rate, is the short book's real risk, and it is why the
+25% stop is not decoration.
+
+**Outcome.** Of **14 books** on one execution model, only **2** have cleared the
+63-session floor that a ranking requires; the other twelve are shown with their
+figures and explicitly withheld from the ordering. Sharpe once read **7.11 on a
+thirteen-session book** — annualising a fortnight's standard deviation returns a
+large, stable-looking number that measures the fortnight — so Sharpe, Sortino
+and CAGR are withheld below the floor alongside the ranking itself.
+
+[**Walk the forward-test books in the prototype →**](https://pranaypatil02.github.io/trading-control-center/#books)
 
 ### Case study — from signal monitor to measurable paper strategy
 
@@ -450,7 +623,7 @@ leaderboard; a strategy with neither rule does not start. The accounts are
 forward observations of stored decisions, not paper fills or hindsight
 backtests, and no brokerage path is present.
 
-[**Open the clickable simulated-account demo →**](https://pranaypatil02.github.io/trading-control-center/#accounts)
+[**Open the clickable book comparison →**](https://pranaypatil02.github.io/trading-control-center/#books)
 
 
 
@@ -501,25 +674,45 @@ making a performance claim.
 
 ## Product decisions that shaped the platform
 
-### A public demo must preserve the product, not the private data
+### A public artifact must be walkable, and must still preserve the private data
 
-**Problem.** Static screenshots explained individual features but did not show
-how the operator moves from a portfolio verdict to an incident, strategy,
-research artifact, or market-breadth view. Publishing the production page would
-also expose trading data and implementation details that do not belong in a
-public portfolio.
+**Problem.** Static screenshots explained individual features but could not show
+how an operator moves from a verdict to its cause — and a flat demo with one
+screen per feature answers "what does it look like" rather than "what happens
+when I click this". Publishing the production page would expose trading data and
+implementation details that do not belong in a public portfolio.
 
-**Product decision.** I built a dependency-free interactive facsimile of the
-current Control Center. It preserves the navigation hierarchy, exception-first
-workflow, cadence-aware health filters, evidence boundaries, responsive layout,
-and market-breadth interaction while using an intentionally synthetic data
-model. The static screenshot is generated from this same artifact, preventing
-the click-through and the portfolio image from describing different products.
+**Product decision.** I built a dependency-free interactive **prototype**, not a
+facsimile of one screen. Every surface has at least one level beneath it and
+every level is a URL (`#view/entity/tab`), so a reviewer can go from *did the
+signals work* → *which event type* → *which stock on which date*, then hand
+someone else the link to exactly that row. A **14-step guided walkthrough**
+drives one narrated path through it, highlighting the element under discussion,
+because a demo that depends on remembering the click order is a demo that fails
+in front of an audience.
 
-**Guardrail.** The banner makes the boundary persistent: synthetic data,
-read-only, and no brokerage connection. The public artifact contains no private
+The data model is split rather than uniformly fake: **research figures are the
+platform's own measured output** — hit rates, intervals, cohort baselines, book
+equity and drawdowns — because those are the product's actual findings and are
+already published in this README. Portfolio balances, breadth tiles and analyzer
+companies are synthetic, and each screen says which it is showing.
+
+**Guardrail.** The banner makes the boundary persistent: read-only, no brokerage
+connection, synthetic balances. The published artifact contains no private
 source, API request, secret, local path, account identifier, live position, or
-order control.
+order control — and that is **enforced rather than asserted**:
+`node tests/render_check.js` fails the build on an absolute path, an
+API-key-shaped string, an email address or a vendor credential name reaching
+`docs/`. It caught a leaked local file path on its first run, inside a
+provenance field nobody had thought to sanitize.
+
+**Outcome.** The same harness drives all 315 routes and all 14 walkthrough
+steps, asserts that each analytical screen states its conclusion above its first
+table, and asserts that the two opposite signal claims are never collapsed into
+one row. Five deliberate mutations — removing a conclusion, moving it below the
+table, pooling the claims, breaking a tour step, and stripping a short book's
+stop — were each confirmed to fail it, because a dead assertion reads as
+coverage and is worse than an absent one.
 
 **A strategy is a lifecycle, not a script.** Research, paper trading,
 production, and dormant work are distinct states in the registry. Promotion
@@ -597,7 +790,7 @@ Per-signal contribution, sorted. Values redacted; the structure is the point.
 ![Signal attribution](screenshots/06-signal-attribution.png)
 
 ### Progressive disclosure — three-level navigation
-Two levels vertical, third horizontal. 40 strategies across 7 families stay
+Two levels vertical, third horizontal. 69 strategies across 7 families stay
 navigable without a search box being the only way in.
 
 ![Information architecture](screenshots/07-information-architecture.png)
@@ -619,11 +812,11 @@ warning above the table because the ranking is misleading without it.
 | **Storage** | SQLite (WAL mode, async background writer, point-in-time snapshot tables) |
 | **Frontend** | HTML/CSS/SVG. No framework, no build step, no JS dependencies — pages open straight from disk. (Web fonts are the one external request.) |
 | **Charts** | SVG generated server-side; no charting library |
-| **Automation** | launchd (65 agents), GitHub Actions |
+| **Automation** | launchd (88 agents, 80 loaded), GitHub Actions |
 | **Scraping** | Playwright (headless Chromium), lxml |
 | **ML** | LightGBM, scikit-learn — day-type classifier, benchmarked against a rules baseline |
 | **Security** | PBKDF2 + Fernet encrypted local credential vault; no secrets in source or logs |
-| **Testing** | pytest — 75K lines across 250 test files; 4,200+ tests run as a release gate |
+| **Testing** | pytest — 110K lines across 338 test files; 6,655 tests run as a release gate. The prototype adds a Node DOM-shim harness over all 315 of its routes |
 | **Validation** | pydantic |
 
 ### API and data integrations
