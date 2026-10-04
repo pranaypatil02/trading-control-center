@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Interactive, sanitized product demo of the Trading Control Center.">
-  <title>Trading Control Center — Interactive Demo</title>
+  <meta name="description" content="Interactive prototype of the Trading Control Center: every screen clickable, with drill-downs and a guided walkthrough.">
+  <title>Trading Control Center — Interactive Prototype</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -12,8 +12,8 @@
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="demo-banner" role="note">
     <span class="demo-dot" aria-hidden="true"></span>
-    Public product demo
-    <span class="demo-copy">Synthetic data · read-only · no brokerage connection</span>
+    Public prototype
+    <span class="demo-copy">Read-only · no brokerage connection · portfolio balances are synthetic</span>
   </div>
 
   <div class="shell">
@@ -32,26 +32,28 @@
 
       <nav id="primary-nav">
         <p class="nav-label">Today</p>
-        <button class="nav-item active" data-view="dashboard"><span class="nav-icon">◫</span><span>Platform Dashboard</span></button>
-        <button class="nav-item" data-view="seasonality"><span class="nav-icon">◌</span><span>Seasonality board</span><b>29</b></button>
-        <button class="nav-item" data-view="analyzer"><span class="nav-icon">⌁</span><span>Stock analyzer</span><b>500</b></button>
-        <button class="nav-item" data-view="agent"><span class="nav-icon">✦</span><span>Research agent</span><b>read only</b></button>
+        <button class="nav-item active" data-go="dashboard" data-view="dashboard"><span class="nav-icon">◫</span><span>Platform dashboard</span></button>
+        <button class="nav-item" data-go="verified" data-view="verified"><span class="nav-icon">✓</span><span>Were they right?</span><b>new</b></button>
+        <button class="nav-item" data-go="seasonality" data-view="seasonality"><span class="nav-icon">◌</span><span>Seasonality board</span></button>
 
         <p class="nav-label">Running</p>
-        <button class="nav-item" data-view="strategies"><span class="nav-icon">◇</span><span>Strategies</span><i class="alert-dot"></i><b>40</b></button>
-        <button class="nav-item" data-view="jobs"><span class="nav-icon">↻</span><span>Bots &amp; jobs</span><i class="alert-dot"></i><b>72</b></button>
-        <button class="nav-item" data-view="health"><span class="nav-icon">△</span><span>Alerts &amp; health</span><b>3</b></button>
+        <button class="nav-item" data-go="strategies" data-view="strategies"><span class="nav-icon">◇</span><span>Strategies</span><b id="nav-strategies">69</b></button>
+        <button class="nav-item" data-go="jobs" data-view="jobs"><span class="nav-icon">↻</span><span>Bots &amp; jobs</span><i class="alert-dot"></i><b id="nav-jobs">108</b></button>
 
         <p class="nav-label">Review</p>
-        <button class="nav-item" data-view="performance"><span class="nav-icon">↗</span><span>Book performance</span></button>
-        <button class="nav-item" data-view="accounts"><span class="nav-icon">◎</span><span>Simulated accounts</span><b>6</b></button>
-        <button class="nav-item" data-view="reports"><span class="nav-icon">▤</span><span>Reports &amp; research</span><b>39</b></button>
-        <button class="nav-item" data-view="matrix"><span class="nav-icon">▦</span><span>Market breadth</span><b>new</b></button>
+        <button class="nav-item" data-go="books" data-view="books"><span class="nav-icon">◎</span><span>Forward tests</span><b id="nav-books">14</b></button>
+        <button class="nav-item" data-go="portfolio" data-view="portfolio"><span class="nav-icon">▰</span><span>Portfolio</span></button>
+
+        <p class="nav-label">Research</p>
+        <button class="nav-item" data-go="analyzer" data-view="analyzer"><span class="nav-icon">⌁</span><span>Stock analyzer</span></button>
+        <button class="nav-item" data-go="matrix" data-view="matrix"><span class="nav-icon">▦</span><span>Market breadth</span></button>
+        <button class="nav-item" data-go="reports" data-view="reports"><span class="nav-icon">▤</span><span>Reports &amp; research</span></button>
+        <button class="nav-item" data-go="agent" data-view="agent"><span class="nav-icon">✦</span><span>Research agent</span><b>read only</b></button>
       </nav>
 
       <div class="sidebar-footer">
         <span class="health-pulse"></span>
-        <span><strong>Read-only showcase</strong><small>Last demo refresh · today</small></span>
+        <span><strong>Interactive prototype</strong><small>Every screen goes one level deeper</small></span>
       </div>
     </aside>
 
@@ -59,12 +61,12 @@
       <header class="topbar">
         <button class="mobile-nav" id="mobile-nav" aria-label="Open navigation" aria-expanded="false">☰</button>
         <div>
-          <p class="eyebrow" id="page-eyebrow">Operating view · synthetic snapshot</p>
+          <p class="eyebrow" id="page-eyebrow">Action queue · operating view</p>
           <h1 id="page-title">What to look at today</h1>
         </div>
         <div class="top-actions">
-          <button class="ghost-button" id="refresh-button"><span aria-hidden="true">↻</span> Refresh demo</button>
-          <span class="as-of"><i></i><span><small>System state</small><strong>Demo healthy</strong></span></span>
+          <button class="primary-button" id="tour-button"><span aria-hidden="true">▶</span> Guided walkthrough</button>
+          <span class="as-of"><i></i><span><small>Prototype state</small><strong>All screens live</strong></span></span>
         </div>
       </header>
 
@@ -73,6 +75,8 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="data.js"></script>
   <script src="app.js"></script>
+  <script src="tour.js"></script>
 </body>
 </html>

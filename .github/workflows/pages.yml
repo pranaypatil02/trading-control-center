@@ -1,11 +1,16 @@
-name: Deploy interactive showcase
+name: Deploy interactive prototype
 
 on:
   push:
     branches: [main]
     paths:
       - "docs/**"
+      - "tests/**"
       - ".github/workflows/pages.yml"
+  pull_request:
+    paths:
+      - "docs/**"
+      - "tests/**"
   workflow_dispatch:
 
 permissions:
@@ -18,7 +23,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # A broken prototype must not reach the published URL, and neither must a
+  # private path or a credential-shaped string. The render harness needs
+  # nothing but Node, so the cheap gate runs first and fails fast.
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Render every route and walkthrough step
+        run: node tests/render_check.js
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install Chromium
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+      - name: Drive the prototype in a browser
+        run: python3 tests/browser_check.py
+
   deploy:
+    needs: check
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
