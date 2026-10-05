@@ -16,7 +16,7 @@ not the whole product.
 | Forward-tested strategy books | **14 on one execution model** |
 | Historical market data | **114.5M options minute bars · 6.85M daily-price rows** |
 | Codebase | **380K tracked Python lines · 269K implementation/research + 110K tests** |
-| Verification | **6,655 tests across 338 test files, run as a release gate** |
+| Verification | **6,706 tests across 339 test files, run as a release gate** |
 | External systems | **14 market-data, brokerage, filing, research, and alert integrations** |
 
 This repository holds **the interactive prototype, screenshots, and design
@@ -738,6 +738,37 @@ named as blockers instead of receiving invented capital. Scheduled jobs append
 marks over time and preserve corrections as revisions. The screenshot uses
 entirely synthetic names and figures; it demonstrates the workflow rather than
 making a performance claim.
+
+### Case study — refusing a flattering partial backtest
+
+![Discovery strategy tests with blocked long history and an exploratory short pilot](screenshots/35-discovery-strategy-tests.png)
+
+**Problem.** Three research ideas looked testable from the warehouse: quiet
+momentum, market-residual momentum, and post-earnings drift on crowded reporting
+days. The broad price store was large enough to produce returns, but a selected
+delisted constituent lacked independent history, and older earnings records had
+neither reliable release times nor point-in-time consensus vintages. Dropping
+those rows would make the backtest cleaner and less truthful.
+
+**Product decision.** Register the formulas, benchmark, dates, transaction costs,
+delay stress, and refusal rules before calculating portfolios. Publish the
+requested multi-year test as blocked, then show a separately labelled eleven-month
+pilot only because its start was determined by verified vendor coverage. Compare
+both variants with plain momentum and SPY, and state the model limitation found
+during review: the first residual formula behaves largely like recent residual
+reversal rather than persistent residual momentum.
+
+**Guardrails.** Every selected stock needs reconciled opening and closing prices;
+missing names never pull in the next-ranked survivor. Specific vendor conflicts
+require a third independent source and leave an immutable correction ledger.
+Blocked attempts, exact picks, input hashes, and stress results stay in the
+research archive. No backtest changes a paper account or production strategy.
+
+**Outcome.** The pilot made money, but both new variants lagged plain momentum;
+one fell below SPY after a one-session execution delay. The longer momentum test
+and the earnings-crowding test remain blocked. The useful outcome is a decision:
+do not promote any of the three yet, repair the historical evidence first, and
+register a corrected residual-momentum formulation before retesting it.
 
 ### Retrieval and operational freshness
 
