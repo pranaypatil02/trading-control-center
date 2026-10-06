@@ -454,6 +454,34 @@ held NVDA in 7 of 10 years. Leaving NVDA&rsquo;s slot in cash lowered CAGR to 16
 and the SPY win count to 6/10, making the strategy&rsquo;s single-name dependence
 visible beside the headline result.
 
+### Case study — a breakout screen that can publish zero picks
+
+![Numeric S&P 500 breakout screen](screenshots/37-numeric-breakout-screen.png)
+
+**Problem.** Visual breakout scans make chart-pattern judgment hard to audit,
+and many products quietly drop symbols with incomplete data. They also tend to
+show a ranked list even when no company clears every rule, which turns a screen
+into an implicit recommendation engine.
+
+**Product decision.** I defined the pattern as a deterministic funnel: trend,
+relative strength, numeric base quality, breakout distance, volume, and close
+location. The result is a tracked filter rather than a portfolio. Empty states,
+the full funnel, excluded symbols, borderline inputs, and prior signals are all
+first-class parts of the daily report.
+
+**Guardrails.** Each run reconstructs point-in-time membership from a validated
+Wikipedia snapshot and change log, requires exactly 320 direct-symbol sessions,
+and fails publication below 490 usable members. Immutable observations expose
+vendor rewrites as revisions. Input bars and provenance are content-addressed,
+event-source gaps remain visible, and 5/10/20-session outcomes are labeled as
+diagnostics against SPY rather than executable returns.
+
+**Outcome.** The first production run evaluated **500 of 503 constituents** and
+explicitly skipped three short-history names. No current company passed every
+breakout rule, so the product published zero confirmed picks instead of relaxing
+the thresholds. A ten-session seed retained earlier confirmed and extended
+cases, allowing the evidence base to accumulate without simulated capital.
+
 ### Case study — deterministic S&P 500 Reversal Watch
 
 ![S&P 500 Reversal Watch](screenshots/21-reversal-watch.png)
