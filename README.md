@@ -395,31 +395,42 @@ Missing inputs are omitted and disclosed instead of being converted to zero.
   </tr>
 </table>
 
+![S&P 500 monthly return seasonality ranked by average or median move](screenshots/40-monthly-return-seasonality.png)
+
 **Problem.** A conventional momentum score says which company ranks higher but
 hides the path. Two stocks can finish with the same return after very different
 sequences: one advanced steadily, while the other relied on a single jump and
 then reversed. Reviewing hundreds of separate price charts made that pattern
 slow to compare and easy to remember selectively.
 
-**Product decision.** I added two linked S&P 500 research screens. The company
+**Product decision.** I added three linked S&P 500 research screens. The company
 view shows each calendar month as up, down, flat, missing, or pending across the
 last ten available years, with annual counts and consecutive-month streaks. The
 leadership view ranks the current year by completed positive-month count, then
 by adjusted-price return from the prior December close. Future months remain
 visibly pending and fill automatically after their official month-end close.
+The seasonality view flips the comparison: choose a month, then rank every
+current member by the size of its historical move. Average and median receive
+separate ranks so an exceptional year cannot silently stand in for the typical
+result.
 
 **Guardrails.** January always compares with the prior December close. Companies
 without every completed current-year month stay visible but cannot outrank a
 fully covered company. Publication fails below 90% complete-universe coverage.
+The return-seasonality view uses the most recent ten completed observations for
+each month, excludes a month still in progress, and requires five observations
+before assigning a rank; shorter histories remain visible below ranked names.
 The screen uses today&rsquo;s constituents, so historical rows explicitly disclose
 current-membership survivorship bias and are not presented as a historical
 index backtest.
 
-**Outcome.** One screen answers who has led consistently this year; the other
-shows whether that behavior is persistent or unusual for the company. The first
+**Outcome.** One screen answers who has led consistently this year, one shows
+whether that path is persistent for a company, and one identifies which stocks
+have historically delivered the largest move in a selected month. The first
 production run covered 501 of 503 current constituents completely through nine
-months, while two recent additions remained visible as partial records rather
-than receiving misleading ranks.
+months. For October, 491 names cleared the five-observation floor; the average
+and median leaders differed, making the outlier distinction visible rather than
+burying it in one score.
 
 ### Case study — testing annual winner and loser persistence without survivor bias
 
