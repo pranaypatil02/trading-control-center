@@ -482,6 +482,32 @@ breakout rule, so the product published zero confirmed picks instead of relaxing
 the thresholds. A ten-session seed retained earlier confirmed and extended
 cases, allowing the evidence base to accumulate without simulated capital.
 
+![Additional-stocks breakout screen](screenshots/38-additional-stocks-breakout-screen.png)
+
+**Expansion decision.** I extended the same rule set to the 1,023 names in the
+stored top-1500 market-cap universe that are outside the current S&P 500. It is
+a separate screen, store, schedule, and outcome history so changing broad-market
+membership cannot rewrite the S&P evidence. The page exposes trend-and-RS
+baseline names even when no stock reaches confirmed or watchlist status.
+
+**Broader-universe guardrail.** The top-1500 file is a current snapshot, with no
+historical membership change log. The product says this above the results and
+labels replay as operational catch-up rather than a survivorship-free backtest.
+It rejects snapshots below 1,400 names or more than seven days old, requires the
+same 320 direct-symbol sessions, and fails publication below 900 usable names.
+The first run evaluated **923 of 1,023 names**, listed all 100 exclusions, and
+again published zero confirmed picks without weakening the rules.
+
+![Control Center breakout radar](screenshots/39-control-center-breakout-radar.png)
+
+**Operating outcome.** Both screens run every evening after the final price
+refresh, with separate morning catch-ups. The Control Center reads their latest
+immutable observations into one Breakout Radar: confirmed and extended names
+are labeled as breakouts, watchlist names as potential breakouts, and baseline
+names are excluded. An empty radar is explicit rather than filled with lower
+quality candidates. Its render-only update cannot trigger unrelated vendor
+calls, so publishing the result is not coupled to another research pipeline.
+
 ### Case study — deterministic S&P 500 Reversal Watch
 
 ![S&P 500 Reversal Watch](screenshots/21-reversal-watch.png)
