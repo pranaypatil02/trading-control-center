@@ -308,6 +308,8 @@ instead of being presented as financial research.
 
 ![Evidence-bound equity thesis](screenshots/24-equity-thesis.png)
 
+![Business-model-specific valuation routing](screenshots/41-company-specific-valuation.png)
+
 **Problem.** Standalone valuation, quality, forecast, peer, and market-behavior
 reports made the evidence hard to reconcile. A long-form thesis could also look
 more certain than its inputs—especially when vendor prices were stale, analyst
@@ -321,8 +323,21 @@ advances in market-cap order as two 25-stock slices, then stops after each
 the stock-detail views in the Control Center make every published thesis
 discoverable from the same workflow used to inspect the company.
 
+The valuation layer now routes each company through the production classifier's
+business-model-specific method—software, semiconductors, nonbank financials,
+REITs, energy, health care, consumer, industrial or communications—when the
+stored result is current and sufficiently confident. Generic DCF and multiple
+families remain visible as cross-checks rather than equal votes. A historical
+normal P/E is paired only with a compatible, positive forward EPS estimate from
+the same earnings series; it is never multiplied by trailing GAAP EPS.
+
 **Guardrail.** The report identifies the price and date used, surfaces source
 price discrepancies, and carries missing or weak evidence into the conclusion.
+Specialist inputs expire after 21 days and after a 25% price move. Mixed
+physical-product/software companies require segment-level sum-of-the-parts data;
+without it, the report names the missing method, labels the generic median as a
+cross-check, and withholds a reliable fair-value conclusion. A threefold spread
+between the primary method and cross-checks also forces an unresolved verdict.
 Each detailed run refreshes the issuer's public SEC filings, then uses DeepSeek
 V4.1 Flash hosted search for the latest earnings release, presentation, and
 other public evidence. It grounds research claims in dated sources, links each

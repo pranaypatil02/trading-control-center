@@ -1205,6 +1205,14 @@ const COMPANIES = [
   ["FLUX", "Flux Energy", "Energy", 41, 81, 7.8, 11.3, "+2.7%", 9],
 ];
 
+const PRIMARY_VALUATION_MODELS = {
+  ALPH: ["Software cash-flow + earnings blend", "software", 76],
+  BRVO: ["Cycle-normalized semiconductor blend", "semiconductors", 81],
+  CDEL: ["Payment-network cash-flow blend", "payment networks", 72],
+  DRFT: ["Health-care operating model", "health care", 68],
+  FLUX: ["Mid-cycle energy blend", "energy", 74],
+};
+
 function renderAnalyzer(state) {
   if (state.key) return renderCompanyDetail(state);
   return `${shell(
@@ -1241,26 +1249,31 @@ function renderCompanyDetail(state) {
     ["thesis", "Thesis"],
   ];
   const thin = c[8] < 5;
+  const primaryModel = PRIMARY_VALUATION_MODELS[c[0]];
 
   const body = {
     valuation: () => `
+      ${insight(
+        `Primary method: ${primaryModel[0]}`,
+        `The classifier routed this synthetic company to the ${primaryModel[1]} model at ${primaryModel[2]}% confidence. Generic DCF and multiples remain visible as cross-checks; they are not equal votes in a median.`
+      )}
       ${metricCards([
         ["Blended multiple", `${c[5].toFixed(1)}×`, "on the metric it is charted on", ""],
         ["Its own ten-year normal", `${c[6].toFixed(1)}×`, "never the spot multiple", ""],
         ["Against its own history", `${(((c[5] - c[6]) / c[6]) * 100).toFixed(0)}%`, c[5] > c[6] ? "above normal" : "below normal", c[5] > c[6] ? "negative" : "positive"],
-        ["Method spread", c[0] === "FLUX" ? "4.1×" : "1.8×", c[0] === "FLUX" ? "past the 3× gate — a median of these is a number nobody computed on purpose" : "within the gate", c[0] === "FLUX" ? "negative" : ""],
+        ["Method spread", c[0] === "FLUX" ? "4.1×" : "1.8×", c[0] === "FLUX" ? "past the 3× gate — no reliable fair value is published" : "specialist and cross-checks agree within the gate", c[0] === "FLUX" ? "negative" : ""],
       ])}
       <section class="panel"><div class="panel-head"><div><h2>Three cases, and the refusals beside them</h2>
         <p>Refusing is a first-class result. Each guard below removed a name that otherwise topped the screen.</p></div></div>
         <div class="panel-body"><table class="jobs-table"><thead><tr><th>Method</th><th>Value</th><th>Status</th></tr></thead><tbody>
           <tr><td>Discounted cash flow</td><td class="n">$${(c[5] * 4.1).toFixed(2)}</td><td><span class="status healthy">applied</span></td></tr>
-          <tr><td>Fair P/E on own normal</td><td class="n">$${(c[6] * 4.4).toFixed(2)}</td><td><span class="status healthy">applied</span></td></tr>
+          <tr><td>Normal P/E × compatible forward EPS</td><td class="n">$${(c[6] * 4.4).toFixed(2)}</td><td><span class="status healthy">applied</span></td></tr>
           <tr><td>EV/EBITDA</td><td class="n">${c[2] === "Payments" ? "—" : `$${(c[5] * 3.7).toFixed(2)}`}</td>
             <td>${c[2] === "Payments" ? `<span class="status stale">refused — financials get no enterprise multiple; deposits are funding, not leverage</span>` : `<span class="status healthy">applied</span>`}</td></tr>
           <tr><td>Published vendor fair value</td><td class="n">$${(c[6] * 4.0).toFixed(2)}</td><td><span class="status healthy">applied, scenario-scaled</span></td></tr>
         </tbody></table>
         ${caveat(
-          "The blend is a <strong>median, not a mean</strong>. These methods do not fail gracefully — they fail by an order of magnitude, and one doing so drags a mean most of the way to itself. The spread is published either way."
+          "A specialist result becomes primary only while its inputs are current, its confidence clears the gate, and price has not moved far beyond the model snapshot. Physical-product/software hybrids require segment-level sum-of-the-parts data. When that evidence is missing, the product labels the generic median as a cross-check and withholds a fair-value conclusion."
         )}</div></section>`,
 
     quality: () => `
