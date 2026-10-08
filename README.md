@@ -11,9 +11,9 @@ not the whole product.
 
 | Platform scale | Current footprint |
 |---|---:|
-| Registered strategies and research studies | **69 across 7 families** |
-| Automated operations | **108 health-reporting jobs · 88 scheduled agents (80 loaded)** |
-| Forward-tested strategy books | **14 on one execution model** |
+| Registered strategies and research studies | **70 across 7 families** |
+| Automated operations | **113 health-reporting jobs · 93 scheduled agents (84 loaded)** |
+| Forward-tested strategy books | **15 on one execution model** |
 | Historical market data | **114.5M options minute bars · 6.85M daily-price rows** |
 | Codebase | **380K tracked Python lines · 269K implementation/research + 110K tests** |
 | Verification | **6,706 tests across 339 test files, run as a release gate** |
@@ -36,8 +36,8 @@ to the individual stock that produced it:
 | **Now** — everything needing a decision, ranked by consequence | The section that owns the number | The job, book or episode behind it |
 | **Changed** — what moved since the last completed session | The thing that moved | Its own history |
 | Signal verification — did the published signals work? | Any of 13 event types, with its interval and verdict | A single episode, graded at 5, 10 and 20 sessions |
-| Forward tests — 14 hypothetical $25,000 books | A book's performance, contract, trades and costs | Why that book can or cannot be ranked |
-| Strategy registry — 69 strategies by lifecycle stage | A strategy's workspace, jobs and attached book | The run history of any job behind it |
+| Forward tests — 15 hypothetical $25,000 books | A book's performance, contract, trades and costs | Why that book can or cannot be ranked |
+| Strategy registry — 70 strategies by lifecycle stage | A strategy's workspace, jobs and attached book | The run history of any job behind it |
 | Bots & jobs — one square per job, grouped by owner | A job's reliability strip and alerting rules | — |
 | Portfolio · analyzer · breadth · seasonality | Holding, company, industry and candidate detail | Per-layer evidence, with its polarity |
 
@@ -121,7 +121,7 @@ ownership, a macro dashboard, and options greeks were refused for a simpler
 reason — no local data supports them, and the refusals are published beside the
 roadmap so nobody re-derives them.
 
-**I set the information architecture.** At 69 strategies, eleven flat sections
+**I set the information architecture.** At 70 strategies, eleven flat sections
 were a list to read rather than a structure to navigate. The rail is grouped by
 *what you came to do* — Today, Running, Review, Research — and strategies group
 by **stage** rather than family, because consequence is the axis that matters at
@@ -212,7 +212,7 @@ flowchart LR
 
 ## The Control Center — one interface for the platform
 
-At 69 strategies, separate report files stopped scaling as a product. The
+At 70 strategies, separate report files stopped scaling as a product. The
 Control Center became the common navigation and operating layer. It answers
 four questions, in order:
 
@@ -356,7 +356,41 @@ what survived validation and how many model paragraphs were discarded. A batch
 cannot silently continue past the human review point or fill evidence gaps with
 invented values.
 
-### Case study — observability for 108 automated jobs
+### Case study — turning a screen into a measurable strategy
+
+![Sanitized GCM-100 screen and paper allocation](screenshots/42-gcm100-forward-screen.png)
+
+**Problem.** A detailed stock-scoring specification can still produce only a
+plausible list. It does not say whether missing inputs were treated as zero,
+whether specialist industries were forced through the wrong model, whether the
+ranking existed before its assumed fill, or whether the list ever beat a simple
+benchmark.
+
+**Product decision.** I implemented Growth at Compressed Multiples as a
+versioned 100-point decision system across valuation, fundamental growth,
+balance-sheet strength, cash-flow quality, capital allocation, and momentum.
+The complete eligible ranking is stored on every run. Its top ten feed an
+equal-weight, hypothetical $25,000 book through the same execution and
+measurement framework as the other forward tests, with SPY as the benchmark.
+
+**Guardrails.** Profitability, liquidity, statement history, forward growth,
+freshness, and solvency are eligibility gates rather than optional score boosts.
+Financials and REITs are withheld until specialist variants exist. Missing
+non-eligibility inputs score zero and remain visible as coverage. The decision
+date is derived from publication time: a ranking created after the open cannot
+claim that morning's fill. A historical result is withheld because the
+warehouse lacks full-universe, point-in-time consensus estimates and normal
+multiples; reconstructing them from current data would create look-ahead and
+survivorship bias.
+
+**Outcome.** The first production pass screened 1,525 companies, retained 611,
+published every exclusion reason, and opened a forward evidence record rather
+than a backfilled performance claim. The Control Center shows the score anatomy,
+searchable eligible and excluded populations, paper allocation, job health, and
+the explicit “too early” state until executable sessions accrue. The screenshot
+uses synthetic company labels; no current picks are published here.
+
+### Case study — observability for 113 automated jobs
 
 ![Job observability](screenshots/18-job-observability.png)
 
@@ -728,7 +762,7 @@ was **TTD at −17.2%** against SPY, and the worst miss **META at +19.4%**. That
 asymmetry, not the hit rate, is the short book's real risk, and it is why the
 25% stop is not decoration.
 
-**Outcome.** Of **14 books** on one execution model, only **2** have cleared the
+**Outcome.** Of **15 books** on one execution model, only **2** have cleared the
 63-session floor that a ranking requires; the other twelve are shown with their
 figures and explicitly withheld from the ordering. Sharpe once read **7.11 on a
 thirteen-session book** — annualising a fortnight's standard deviation returns a
@@ -983,7 +1017,7 @@ Per-signal contribution, sorted. Values redacted; the structure is the point.
 ![Signal attribution](screenshots/06-signal-attribution.png)
 
 ### Progressive disclosure — three-level navigation
-Two levels vertical, third horizontal. 69 strategies across 7 families stay
+Two levels vertical, third horizontal. 70 strategies across 7 families stay
 navigable without a search box being the only way in.
 
 ![Information architecture](screenshots/07-information-architecture.png)
