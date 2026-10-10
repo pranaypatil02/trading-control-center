@@ -408,6 +408,32 @@ that failed 57 of its last 58 runs and makes the next operator action visible.
 been silent for 76 days. Unowned and unmonitored systems are now explicit
 states—not implied successes.
 
+### Case study — bounded self-repair for scheduled failures
+
+![Sanitized weekly self-repair report](screenshots/43-weekly-self-repair.png)
+
+**Problem.** Detection alone still left every failure with the same manual
+response: inspect it, decide whether a retry is safe, start it, and later check
+whether it actually recovered. A generic auto-restart would be worse because
+some jobs place orders, consume metered data, hold scarce memory, or fail for a
+deterministic configuration reason.
+
+**Product decision.** I added a weekly policy layer over the existing
+cadence-aware monitor and launch-service allowlist. It retries only a loaded,
+one-shot job after its first transient failure, records the decision before the
+external action, permits one attempt per incident, and verifies recovery from a
+newer job-ledger result. Order-capable, costly, heavy, repeated, credential,
+subscription, and scheduler-state failures receive a specific recommendation
+instead. The workflow cannot edit code, credentials, schedules, or broker
+state.
+
+**Outcome.** The first production survey classified 20 live findings and
+started zero unsafe retries: each required diagnosis, operator review, or a
+source/configuration repair. That zero is the guardrail working. The system now
+separates failures that can recover from an idempotent retry from failures where
+restarting would hide the cause, and a Monday verification pass closes the loop
+on any safe retry started Sunday.
+
 ### S&P 500 cross-sectional research
 
 <table>
