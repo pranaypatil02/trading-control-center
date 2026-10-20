@@ -66,6 +66,17 @@ value, credential, local path, or order control is published.
   </tr>
 </table>
 
+### Latest product update — buying and selling pressure
+
+The Research workspace now includes a searchable daily-bar pressure view with
+daily and 5/20-session estimates, relative volume, 25-session buy/sell counts,
+distribution flags, explicit missing-data handling, and a stale-session warning.
+It is labelled as a bar-based proxy throughout: it does not claim trade-level
+volume delta or institutional flow. [Read the case study](docs/buying-selling-pressure.md)
+or [open the interactive mockup](https://pranaypatil02.github.io/trading-control-center/#pressure).
+
+![Synthetic buying and selling pressure mockup](screenshots/35-volume-pressure.png)
+
 Two harnesses gate the deploy, so a broken prototype cannot reach the published
 URL. `node tests/render_check.js` drives all **315 routes** and all 14
 walkthrough steps under a DOM shim, asserts that every analytical screen states

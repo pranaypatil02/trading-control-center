@@ -1458,7 +1458,55 @@ function renderReportDetail(state) {
     <div class="empty">This artifact opens as its own view in the prototype.</div>`;
 }
 
-/* ------------------------------------------------------- 10. seasonality */
+/* ------------------------------------------ 10. buying & selling pressure */
+const PRESSURE_ROWS = [
+  ["DEMO1", "Example Industrial", -1.2, -0.86, 1.10, -0.16, -0.23, 8, 16, 8, 3, "distribution"],
+  ["DEMO2", "Example Software", 1.8, 0.72, 1.25, 0.20, 0.28, 10, 14, 7, 4, "accumulation"],
+  ["DEMO3", "Example Retail", -1.2, -0.34, 1.40, -0.08, -0.11, 12, 12, 6, 5, "net selling"],
+  ["DEMO4", "Example Energy", 1.8, 0.45, 1.55, 0.10, 0.14, 14, 10, 5, 6, "net buying"],
+  ["DEMO5", "Example Health", -1.2, 0.00, 1.70, 0.01, 0.02, 16, 8, 4, 7, "neutral"],
+];
+
+function renderPressure() {
+  const lower = PRESSURE_ROWS.filter((r) => r[3] < 0).length;
+  const upper = PRESSURE_ROWS.filter((r) => r[3] > 0).length;
+  const signedPct = (value) => `${value > 0 ? "+" : ""}${Math.round(value * 100)}%`;
+  return `${shell(
+    "Buying & selling pressure",
+    "A searchable daily-bar estimate across tracked stocks. Price movement stays separate from where a stock closed inside its daily range.",
+    `
+    ${insight(
+      `${lower} of ${PRESSURE_ROWS.length} illustrative names closed in the lower half of their range and ${upper} in the upper half.`,
+      "This is a daily OHLCV proxy derived from close location times volume. It is not trade-level volume delta, institutional ownership flow, or proof that shares changed hands net — every trade still has a buyer and a seller."
+    )}
+    ${metricCards([
+      ["Lower half", String(lower), "daily selling-pressure proxy", "negative"],
+      ["Upper half", String(upper), "daily buying-pressure proxy", "positive"],
+      ["Window", "25 sessions", "buy/sell and distribution counts", ""],
+      ["Coverage", "Fail closed", "gaps and missing volume are excluded", ""],
+    ])}
+    <section class="panel"><div class="panel-head"><div><h2>Illustrative all-stock view</h2>
+      <p>Synthetic companies and values. The production view also supports ticker, company and sector search.</p></div>
+      <span class="meta-pill">Synthetic demo</span></div>
+      <table class="jobs-table wide"><thead><tr><th>Ticker</th><th>Company</th><th>Change</th><th>Session</th><th>Daily pressure</th><th>Relative volume</th><th>5-day</th><th>20-day</th><th>Buy days</th><th>Sell days</th></tr></thead>
+      <tbody>${PRESSURE_ROWS.map((r) => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td>
+        <td class="n ${tone(r[2])}">${r[2] > 0 ? "+" : ""}${r[2].toFixed(1)}%</td><td>${r[11]}</td>
+        <td class="n ${tone(r[3])}">${signedPct(r[3])}</td><td class="n">${r[4].toFixed(2)}×</td>
+        <td class="n ${tone(r[5])}">${signedPct(r[5])}</td><td class="n ${tone(r[6])}">${signedPct(r[6])}</td>
+        <td class="n">${r[7]}</td><td class="n">${r[8]}</td></tr>`).join("")}</tbody></table></section>
+    ${caveat(
+      "A gap-down recovery can show positive pressure despite a negative daily return, so the two columns are never merged into one score. Distribution counts use a simplified price-volume rule and are not official IBD counts. Divergence is descriptive, not a calibrated significance test."
+    )}
+    <section class="panel pressure-case"><div class="panel-head"><div><h2>From the production mockup</h2>
+      <p>The public image is sanitized; names and values are illustrative.</p></div>
+      <a class="act-btn open" href="https://github.com/pranaypatil02/trading-control-center/blob/main/docs/buying-selling-pressure.md">Read the case study →</a></div>
+      <img src="pressure-mockup.png" alt="Synthetic buying and selling pressure dashboard with coverage and methodology guardrails">
+    </section>`,
+    "Synthetic values · no account or portfolio data"
+  )}`;
+}
+
+/* ------------------------------------------------------- 11. seasonality */
 const CANDIDATES = [
   ["RCL-like", 2.45, 7.4, 18, "2nd on the calendar, 27th on the tape"],
   ["CAT-like", 2.11, 15.0, 22, "4th on edge against a technical 15"],
@@ -1575,6 +1623,7 @@ const PURPOSE = {
   portfolio: "What the book holds, what changed, where its evidence disagrees with itself, and what that concentration really is.",
   analyzer: "One company at a time, with each research layer kept separate and allowed to return nothing.",
   matrix: "A completed market session as one picture, with the constituents one level under every tile.",
+  pressure: "Where each tracked stock closed inside its daily range, kept separate from price change and labelled as an estimate rather than order flow.",
   seasonality: "What the calendar likes, what the tape likes, and the names where those two halves disagree.",
   reports: "Every registered artifact, aged against its own cadence rather than a single staleness rule.",
   agent: "A read-only assistant over the evidence on this platform. It can explain and it cannot act.",
@@ -1591,6 +1640,7 @@ const views = {
   jobs: { title: "Bots & jobs", eyebrow: "Cadence-aware observability", render: renderJobs },
   portfolio: { title: "Portfolio", eyebrow: "Synthetic book · no real balances", render: renderPortfolio },
   analyzer: { title: "Stock analyzer", eyebrow: "Cross-sectional research", render: renderAnalyzer },
+  pressure: { title: "Buying & selling", eyebrow: "Daily-bar pressure proxy · synthetic demo", render: renderPressure },
   matrix: { title: "Market breadth", eyebrow: "Completed session", render: renderMatrix },
   seasonality: { title: "Seasonality board", eyebrow: "Candidate workflow", render: renderSeasonality },
   reports: { title: "Reports & research", eyebrow: "Registered artifacts", render: renderReports },

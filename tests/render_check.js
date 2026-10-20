@@ -171,6 +171,7 @@ push("analyzer");
   push(`analyzer/${t}`);
   ["valuation", "quality", "forecast", "thesis"].forEach((s) => push(`analyzer/${t}/${s}`));
 });
+push("pressure");
 push("matrix");
 push("seasonality");
 push("reports");
@@ -199,7 +200,7 @@ for (const p of paths) {
 /* --------------------------------------------------------- invariants */
 /* Every analytical surface must state its conclusion above its evidence —
  * the same rule the production console is pinned to. */
-const CONCLUDES = ["now", "changed", "verified", "books", "strategies", "jobs", "matrix", "seasonality", "reports"];
+const CONCLUDES = ["now", "changed", "verified", "books", "strategies", "jobs", "pressure", "matrix", "seasonality", "reports"];
 for (const p of CONCLUDES) {
   global.location.hash = `#${p}`;
   render();

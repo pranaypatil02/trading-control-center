@@ -512,6 +512,7 @@ body.tour-on { overflow-x: hidden; }
 section.panel:has(> table) { overflow-x: auto; }
 section.panel > table { min-width: 560px; }
 @media (max-width: 760px) { section.panel > table { min-width: 460px; } }
+.pressure-case img { display: block; width: 100%; height: auto; border-top: 1px solid var(--line); }
 
 /* A <button> centres its text by default, which left the action-queue rows
    reading as centred cards rather than as a list. */
