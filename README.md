@@ -66,6 +66,19 @@ value, credential, local path, or order control is published.
   </tr>
 </table>
 
+### Latest product update — options volatility on every company
+
+Every company page now separates the current constant-30-day ATM implied
+volatility from its two historical contexts: **IV Rank** (position inside the
+one-year low/high range) and **IV Percentile** (share of prior sessions below
+today). The product withholds the one-year interpretation while its new,
+method-compatible history is still accruing, shows the monthly expiries used,
+and states that IV prices magnitude rather than direction. [Read the case
+study](docs/options-implied-volatility.md) or [open the synthetic company
+mockup](https://pranaypatil02.github.io/trading-control-center/#analyzer/ALPH/volatility).
+
+![Synthetic company options-volatility mockup](screenshots/44-options-volatility.png)
+
 ### Latest product update — buying and selling pressure
 
 The Research workspace now includes a searchable daily-bar pressure view with

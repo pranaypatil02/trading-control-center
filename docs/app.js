@@ -1213,6 +1213,14 @@ const PRIMARY_VALUATION_MODELS = {
   FLUX: ["Mid-cycle energy blend", "energy", 74],
 };
 
+const COMPANY_IV = {
+  ALPH: [42.3, 62.5, 71.4, 25.0, 52.6, 80],
+  BRVO: [65.2, 82.1, 88.0, 34.0, 72.0, 252],
+  CDEL: [28.4, 35.0, 31.0, 21.0, 42.0, 252],
+  DRFT: [51.7, 54.2, 60.0, 31.0, 69.2, 140],
+  FLUX: [73.8, 91.0, 94.0, 29.0, 78.2, 252],
+};
+
 function renderAnalyzer(state) {
   if (state.key) return renderCompanyDetail(state);
   return `${shell(
@@ -1244,12 +1252,14 @@ function renderCompanyDetail(state) {
   const tab = state.sub || "valuation";
   const tabs = [
     ["valuation", "Valuation"],
+    ["volatility", "Options volatility"],
     ["quality", "Quality pillars"],
     ["forecast", "Forecast record"],
     ["thesis", "Thesis"],
   ];
   const thin = c[8] < 5;
   const primaryModel = PRIMARY_VALUATION_MODELS[c[0]];
+  const iv = COMPANY_IV[c[0]];
 
   const body = {
     valuation: () => `
@@ -1274,6 +1284,32 @@ function renderCompanyDetail(state) {
         </tbody></table>
         ${caveat(
           "A specialist result becomes primary only while its inputs are current, its confidence clears the gate, and price has not moved far beyond the model snapshot. Physical-product/software hybrids require segment-level sum-of-the-parts data. When that evidence is missing, the product labels the generic median as a cross-check and withholds a fair-value conclusion."
+        )}</div></section>`,
+
+    volatility: () => `
+      ${insight(
+        iv[5] >= 250
+          ? `${iv[0].toFixed(1)}% constant-30-day IV; rank ${iv[1].toFixed(0)} and percentile ${iv[2].toFixed(0)} over a full year.`
+          : `${iv[0].toFixed(1)}% constant-30-day IV; the relative statistics remain provisional.`,
+        iv[5] >= 250
+          ? "IV Rank locates today between the one-year low and high. IV Percentile counts the historical sessions below today. They are different statistics and both are shown."
+          : `Only ${iv[5]} of roughly 252 sessions exist. The current IV is usable, but a partial sample cannot gate a trade as though it were a one-year range.`
+      )}
+      ${metricCards([
+        ["30-day ATM IV", `${iv[0].toFixed(1)}%`, "annualized expected volatility", ""],
+        ["IV Rank", `${iv[1].toFixed(1)}%`, "position between the one-year low and high", iv[5] >= 250 && iv[1] >= 60 ? "negative" : ""],
+        ["IV Percentile", `${iv[2].toFixed(1)}%`, "historical sessions below today", iv[5] >= 250 && iv[2] >= 60 ? "negative" : ""],
+        ["One-year range", `${iv[3].toFixed(1)}–${iv[4].toFixed(1)}%`, `${iv[5]} / 252 sessions`, iv[5] < 250 ? "negative" : "positive"],
+      ])}
+      <section class="panel"><div class="panel-head"><div><h2>One current number, two historical contexts</h2>
+        <p>The monthly expiries on either side of 30 calendar days are weighted into one comparable maturity.</p></div></div>
+        <div class="panel-body"><dl class="kv-list">
+          <dt>Monthly bracket</dt><dd>Nov 20 / Dec 18</dd>
+          <dt>Rank formula</dt><dd>(current IV − one-year low) / (one-year high − one-year low)</dd>
+          <dt>Percentile formula</dt><dd>prior sessions below current IV / sessions observed</dd>
+          <dt>Direction</dt><dd>None. Higher IV prices a wider move and higher premium; it does not say up or down.</dd>
+        </dl>${caveat(
+          "The production calculation follows Barchart's published monthly 30-day weighting, but contract IV comes from a separate market-data source and can differ from Barchart's binomial value. A new source version starts a new history series rather than mixing incompatible observations."
         )}</div></section>`,
 
     quality: () => `
