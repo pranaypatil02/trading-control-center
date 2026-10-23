@@ -66,14 +66,15 @@ value, credential, local path, or order control is published.
   </tr>
 </table>
 
-### Latest product update — optional technical studies
+### Latest product update — explained technical ratings
 
-Every company page now has a separate daily technical chart. The default keeps
-the decision surface small: **50/200-day trend plus volume participation**.
-Optional overlays add SMA 20, EMA 8/21 and Bollinger Bands; one lower pane at a
-time can show Volume, RSI, MACD, ATR%, ADX/DMI or SPY-relative strength. All
-OHLC is placed on the adjusted-close basis before volatility calculations, and
-none of these views changes the company score. [Read the case
+Every company page now pairs its daily chart with **Summary, Moving Averages,
+and Oscillators** ratings. Eight implemented studies cast transparent
+Sell/Neutral/Buy votes using TradingView's published conditions and score
+bands; every value and explanation remains visible below the rating. The page
+explicitly calls this a reduced set rather than TradingView's full 26-study
+rating. ATR, Bollinger Bands, volume and SPY-relative strength remain unscored
+context, and none of these views changes the company score. [Read the case
 study](docs/technical-indicators.md) or [open the synthetic company
 mockup](https://pranaypatil02.github.io/trading-control-center/#analyzer/ALPH/technicals).
 

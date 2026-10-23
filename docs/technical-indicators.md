@@ -22,6 +22,18 @@ one lower study at a time: Volume, RSI, MACD, ATR%, ADX/DMI or comparative
 relative strength against SPY. The selected studies change the chart only;
 they do not change valuation, quality scores or recommendations.
 
+The latest completed daily bar also gets a compact interpretation layer:
+
+- **Moving Averages** votes on SMA 20/50/200 and EMA 8/21.
+- **Oscillators** votes on RSI 14, MACD 12/26/9 and ADX/DMI 14.
+- **Summary** is the equal-weighted mean of those two group scores.
+
+Each study contributes Sell (−1), Neutral (0), or Buy (+1), with the published
+[TradingView Technical Ratings](https://www.tradingview.com/support/solutions/43000614331-technical-ratings/)
+thresholds mapping the average to Strong Sell, Sell, Neutral, Buy, or Strong
+Buy. The table keeps every value, condition and vote visible so the summary
+cannot hide disagreement between trend and momentum.
+
 This is a curated subset of the
 [Barchart technical-indicator catalog](https://www.barchart.com/education/technical-indicators).
 The selection covers five distinct questions: trend, momentum, volatility,
@@ -45,6 +57,11 @@ participation and market leadership.
 - Only one lower pane is visible at a time. This reduces chart clutter and
   discourages treating several transforms of the same price series as separate
   confirmation.
+- The UI says **reduced set** because TradingView's full Technical Rating uses
+  26 studies. It does not imply equivalence to that product from eight votes.
+- Bollinger Bands, ATR, volume and SPY-relative strength remain context cards.
+  They do not receive directional votes because the published rating formula
+  does not score them.
 
 ## Outcome
 
@@ -52,4 +69,6 @@ Trend, entry context and risk now sit beside the company's fundamental record
 without being blended into it. The default answers the two most useful first
 questions — *what is the regime?* and *does the move have participation?* —
 while the optional studies support deeper inspection without turning the page
-into an indicator dashboard.
+into an indicator dashboard. The interpretation layer answers a sixth question:
+*what do these readings mean right now?* It does so without concealing the
+individual evidence or blending technicals into the fundamental recommendation.

@@ -130,6 +130,24 @@ h1 { margin: 0; font-size: 25px; line-height: 1.15; letter-spacing: -.035em; }
 .chart-point { fill: white; stroke: var(--blue); stroke-width: 2; }
 .chart-footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-top: 13px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; }
 .tech-demo-controls { border: 1px solid var(--line); border-radius: 8px; display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 12px; margin: 0 0 10px; }
+.tech-rating-demo { margin-bottom: 16px; border: 1px solid var(--line); border-radius: 10px; background: white; overflow: hidden; }
+.tech-rating-head { padding: 15px 18px 11px; border-bottom: 1px solid var(--line); }
+.tech-rating-head h2 { margin: 0; font-size: 14px; }
+.tech-rating-head p { margin: 4px 0 0; color: var(--muted); font-size: 10px; }
+.tech-rating-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; padding: 14px 18px; }
+.tech-rating-card { position: relative; border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+.tech-rating-card > span { display: block; color: var(--muted); font-size: 9px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
+.tech-rating-card > em { position: absolute; right: 10px; top: 10px; color: var(--muted); font: normal 9px ui-monospace,monospace; }
+.tech-rating-card > strong { display: block; margin: 3px 0 8px; font-size: 16px; }
+.tech-rating-card > small { display: block; margin-top: 7px; color: var(--muted); font-size: 9px; }
+.tech-rating-track { display: block; position: relative; height: 5px; border-radius: 999px; background: linear-gradient(90deg,#b94840 0%,#d29a43 38%,#cfd3ce 50%,#8cae6b 62%,#2f805d 100%); }
+.tech-rating-track b { position: absolute; top: 50%; width: 8px; height: 8px; border: 2px solid white; border-radius: 50%; background: var(--ink); transform: translate(-50%,-50%); box-shadow: 0 0 0 1px var(--ink); }
+.tech-vote-table { font-size: 10px; }
+.tech-vote-table th,.tech-vote-table td { padding: 8px 10px; }
+.tech-vote { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 9px; font-weight: 800; }
+.tech-vote.buy { color: #176343; background: var(--green-soft); }
+.tech-vote.sell { color: #923c35; background: var(--red-soft); }
+.tech-vote.neutral { color: var(--muted); background: #f0f1ed; }
 .tech-demo-controls legend { color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 0 4px; }
 .tech-demo-controls label { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; }
 .tech-demo-controls input { width: auto; margin: 0; accent-color: var(--blue); }
@@ -150,6 +168,7 @@ h1 { margin: 0; font-size: 25px; line-height: 1.15; letter-spacing: -.035em; }
 .tech-ema21 { fill: none; stroke: #4f7f69; stroke-width: 1.4; }
 .tech-bollinger { fill: none; stroke: #818984; stroke-width: 1.2; stroke-dasharray: 5 4; }
 .tech-zero { stroke: var(--line); stroke-width: 1; stroke-dasharray: 4 4; }
+@media (max-width: 700px) { .tech-rating-grid { grid-template-columns: 1fr; } }
 .legend { display: flex; gap: 14px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 14px; height: 2px; background: var(--blue); }

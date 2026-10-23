@@ -203,6 +203,41 @@ function technicalDemo(c) {
   return `${priceSvg}${lower("volume", "Volume + 20D average", "#4f7f69", volume)}${lower("rsi", "RSI 14 · 30 / 70 guides", "#7357a8", rsi)}${lower("macd", "MACD 12,26,9", "#2f68a2", macd)}${lower("atr", "ATR 14 percent", "#b75a46", atr)}${lower("adx", "ADX / DMI 14", "#2f302d", adx)}${lower("relative", "Relative strength vs SPY · start = 100", "#2f68a2", relative)}`;
 }
 
+/* A compact rating is useful only when the votes remain inspectable. The
+ * production system calculates these values; the public prototype uses one
+ * sanitized synthetic snapshot with the same reduced eight-study contract. */
+function technicalRatingsDemo() {
+  const ratings = [
+    ["Summary", "Buy", 0.3, 2, 1, 5],
+    ["Moving averages", "Strong Buy", 0.6, 1, 0, 4],
+    ["Oscillators", "Neutral", 0.0, 1, 1, 1],
+  ];
+  const cards = ratings.map(([name, label, score, sell, neutral, buy]) => `
+    <article class="tech-rating-card">
+      <span>${name}</span><em>${score >= 0 ? "+" : ""}${score.toFixed(2)}</em><strong>${label}</strong>
+      <i class="tech-rating-track" aria-hidden="true"><b style="left:${((score + 1) * 50).toFixed(0)}%"></b></i>
+      <small>${sell} sell · ${neutral} neutral · ${buy} buy</small>
+    </article>`).join("");
+  const votes = [
+    ["Moving averages", "SMA 20", "$176.42", "Price is above the average.", "Buy"],
+    ["Moving averages", "SMA 50", "$169.18", "Price is above the average.", "Buy"],
+    ["Moving averages", "SMA 200", "$148.91", "Price is above the average.", "Buy"],
+    ["Moving averages", "EMA 8", "$181.10", "Price is above the average.", "Buy"],
+    ["Moving averages", "EMA 21", "$184.27", "Price is below the average.", "Sell"],
+    ["Oscillators", "RSI 14", "64.8", "No oversold rebound or overbought rollover.", "Neutral"],
+    ["Oscillators", "MACD 12,26,9", "2.18 / 1.94", "MACD is above its signal line.", "Buy"],
+    ["Oscillators", "ADX / DMI 14", "ADX 24.2", "-DI leads; ADX is above 20 and falling.", "Sell"],
+  ];
+  return `<section class="tech-rating-demo" aria-labelledby="tech-rating-title">
+    <div class="tech-rating-head"><h2 id="tech-rating-title">Technical interpretation</h2>
+      <p>Reduced set: five moving averages and three oscillators on the latest completed daily bar.</p></div>
+    <div class="tech-rating-grid">${cards}</div>
+    <div class="table-scroll"><table class="jobs-table tech-vote-table"><thead><tr><th>Group</th><th>Indicator</th><th>Value</th><th>Interpretation</th><th>Vote</th></tr></thead>
+      <tbody>${votes.map(([group, indicator, value, why, vote]) => `<tr><td>${group}</td><td><strong>${indicator}</strong></td><td class="n">${value}</td><td>${why}</td><td><span class="tech-vote ${vote.toLowerCase()}">${vote}</span></td></tr>`).join("")}</tbody>
+    </table></div>
+  </section>`;
+}
+
 /* ------------------------------------------------------------------ 0. now */
 /* The front door. One ranked list of things that need deciding, each carrying
  * where it lives and what to do about it — so the reader stops having to know
@@ -1367,9 +1402,10 @@ function renderCompanyDetail(state) {
 
     technicals: () => `
       ${insight(
-        "Trend and participation lead; momentum and volatility provide context.",
-        "The default keeps only the 50/200-day regime and volume visible. Every other study is optional, and none changes the company score."
+        "The reduced technical rating is Buy, with trend stronger than momentum.",
+        "Moving averages and oscillators stay separate so their disagreement remains visible. Every vote is explained, and none changes the company score."
       )}
+      ${technicalRatingsDemo()}
       ${metricCards([
         ["Trend", "Above 50 & 200D", "long and intermediate regime", "positive"],
         ["RSI 14", "64.8", "momentum stretched, not a direction", ""],
@@ -1394,7 +1430,7 @@ function renderCompanyDetail(state) {
             <option value="adx">ADX / DMI 14</option><option value="relative">Relative strength vs SPY</option>
           </select></label>
           <div class="tech-demo-chart">${technicalDemo(c)}</div>
-          ${caveat("ATR and ADX use split-adjusted high/low data; relative strength aligns each stock session with SPY. The options remain chart context only — they do not enter the valuation, quality score or recommendation.")}
+          ${caveat("The rating follows TradingView's published score bands and vote rules only for the eight studies implemented here; it is not TradingView's full 26-study rating. ATR, Bollinger Bands, volume and SPY-relative strength remain unscored context, and no technical rating enters valuation or quality.")}
         </div></section>`,
 
     quality: () => `
