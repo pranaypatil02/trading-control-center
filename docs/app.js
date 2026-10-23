@@ -151,6 +151,58 @@ function sparkRow(values) {
     .join("")}</span>`;
 }
 
+/* The public company is synthetic, but the chart interaction mirrors the
+ * production contract: overlays are independent, and one lower study is shown
+ * at a time so six oscillators cannot manufacture visual agreement. */
+function technicalDemo(c) {
+  const n = 260;
+  const phase = c[0].charCodeAt(0) % 7;
+  const price = Array.from({ length: n }, (_, i) =>
+    82 + i * 0.34 + Math.sin((i + phase) / 7) * 5.2 + Math.sin((i + phase) / 19) * 8.0
+  );
+  const average = (period) => price.map((_, i) =>
+    i < period - 1 ? null : price.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0) / period
+  );
+  const exponential = (period) => {
+    const out = [], weight = 2 / (period + 1); let current = price[0];
+    price.forEach((value, i) => { current = i ? current + weight * (value - current) : value; out.push(current); });
+    return out;
+  };
+  const sma20 = average(20), sma50 = average(50), sma200 = average(200);
+  const ema8 = exponential(8), ema21 = exponential(21);
+  const bbUpper = sma20.map((v) => v === null ? null : v + 7);
+  const bbLower = sma20.map((v) => v === null ? null : v - 7);
+  const W = 760, H = 245, left = 42, right = 12, top = 18, bottom = 25;
+  const vals = price.concat(sma20.filter(Boolean), sma50.filter(Boolean), sma200.filter(Boolean));
+  const lo = Math.min(...vals) - 4, hi = Math.max(...vals) + 4;
+  const X = (i) => left + i / (n - 1) * (W - left - right);
+  const Y = (v) => top + (hi - v) / (hi - lo) * (H - top - bottom);
+  const path = (series) => series.map((v, i) => v === null ? "" : `${i && series[i - 1] !== null ? "L" : "M"}${X(i).toFixed(1)} ${Y(v).toFixed(1)}`).join(" ");
+  const priceSvg = `<svg class="tech-demo-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Synthetic adjusted price with selected moving averages">
+    <g class="chart-grid">${[0.2, 0.5, 0.8].map((p) => `<line x1="${left}" x2="${W-right}" y1="${(top + p * (H-top-bottom)).toFixed(1)}" y2="${(top + p * (H-top-bottom)).toFixed(1)}"/>`).join("")}</g>
+    <path class="tech-price" d="${path(price)}"/><path data-tech-line="sma20" class="tech-sma20" d="${path(sma20)}" hidden/>
+    <path data-tech-line="sma50" class="tech-sma50" d="${path(sma50)}"/><path data-tech-line="sma200" class="tech-sma200" d="${path(sma200)}"/>
+    <path data-tech-line="ema8" class="tech-ema8" d="${path(ema8)}" hidden/><path data-tech-line="ema21" class="tech-ema21" d="${path(ema21)}" hidden/>
+    <path data-tech-line="bollinger" class="tech-bollinger" d="${path(bbUpper)}" hidden/><path data-tech-line="bollinger" class="tech-bollinger" d="${path(bbLower)}" hidden/>
+    <text x="${left}" y="${H-6}">Jul 2025</text><text x="${W-right}" y="${H-6}" text-anchor="end">Oct 2026</text></svg>`;
+  const lower = (kind, title, color, values) => {
+    const h = 145, y0 = Math.min(...values), y1 = Math.max(...values), span = y1 - y0 || 1;
+    const y = (v) => 112 - (v - y0) / span * 82;
+    const d = values.map((v, i) => `${i ? "L" : "M"}${X(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
+    return `<div class="tech-demo-study" data-tech-study-panel="${kind}" ${kind === "volume" ? "" : "hidden"}>
+      <svg class="tech-demo-lower" viewBox="0 0 ${W} ${h}" role="img" aria-label="${title}">
+      <line class="tech-zero" x1="${left}" x2="${W-right}" y1="71" y2="71"/><path d="${d}" fill="none" stroke="${color}" stroke-width="2"/>
+      <text x="${left}" y="14">${title}</text></svg></div>`;
+  };
+  const volume = Array.from({ length: n }, (_, i) => 70 + Math.abs(Math.sin((i + phase) / 5)) * 55 + (i % 17 === 0 ? 48 : 0));
+  const rsi = price.map((_, i) => 50 + Math.sin((i + phase) / 8) * 20 + Math.sin(i / 3) * 6);
+  const macd = price.map((_, i) => Math.sin((i + phase) / 9) * 2.4 + Math.sin(i / 21));
+  const atr = price.map((_, i) => 2.2 + Math.abs(Math.sin((i + phase) / 13)) * 1.4);
+  const adx = price.map((_, i) => 17 + Math.abs(Math.sin((i + phase) / 15)) * 25);
+  const relative = price.map((_, i) => 94 + i * 0.09 + Math.sin((i + phase) / 10) * 3.5);
+  return `${priceSvg}${lower("volume", "Volume + 20D average", "#4f7f69", volume)}${lower("rsi", "RSI 14 · 30 / 70 guides", "#7357a8", rsi)}${lower("macd", "MACD 12,26,9", "#2f68a2", macd)}${lower("atr", "ATR 14 percent", "#b75a46", atr)}${lower("adx", "ADX / DMI 14", "#2f302d", adx)}${lower("relative", "Relative strength vs SPY · start = 100", "#2f68a2", relative)}`;
+}
+
 /* ------------------------------------------------------------------ 0. now */
 /* The front door. One ranked list of things that need deciding, each carrying
  * where it lives and what to do about it — so the reader stops having to know
@@ -1253,6 +1305,7 @@ function renderCompanyDetail(state) {
   const tabs = [
     ["valuation", "Valuation"],
     ["volatility", "Options volatility"],
+    ["technicals", "Technicals"],
     ["quality", "Quality pillars"],
     ["forecast", "Forecast record"],
     ["thesis", "Thesis"],
@@ -1312,6 +1365,38 @@ function renderCompanyDetail(state) {
           "The production calculation follows Barchart's published monthly 30-day weighting, but contract IV comes from a separate market-data source and can differ from Barchart's binomial value. A new source version starts a new history series rather than mixing incompatible observations."
         )}</div></section>`,
 
+    technicals: () => `
+      ${insight(
+        "Trend and participation lead; momentum and volatility provide context.",
+        "The default keeps only the 50/200-day regime and volume visible. Every other study is optional, and none changes the company score."
+      )}
+      ${metricCards([
+        ["Trend", "Above 50 & 200D", "long and intermediate regime", "positive"],
+        ["RSI 14", "64.8", "momentum stretched, not a direction", ""],
+        ["ATR 14", "1.9%", "daily risk in price-neutral units", ""],
+        ["Relative volume", "1.1×", "today versus its 20-day average", ""],
+      ])}
+      <section class="panel"><div class="panel-head"><div><h2>Optional daily studies</h2>
+        <p>Split-adjusted OHLC with stored volume through the latest completed session. Synthetic company and prices.</p></div>
+        <div class="chart-range"><button>6M</button><button class="active">1Y</button><button>2Y</button><button>3Y</button></div></div>
+        <div class="panel-body">
+          <fieldset class="tech-demo-controls"><legend>Price overlays</legend>
+            <label><input type="checkbox" data-tech-overlay="sma20"> SMA 20</label>
+            <label><input type="checkbox" data-tech-overlay="sma50" checked> SMA 50</label>
+            <label><input type="checkbox" data-tech-overlay="sma200" checked> SMA 200</label>
+            <label><input type="checkbox" data-tech-overlay="ema8"> EMA 8</label>
+            <label><input type="checkbox" data-tech-overlay="ema21"> EMA 21</label>
+            <label><input type="checkbox" data-tech-overlay="bollinger"> Bollinger 20,2</label>
+          </fieldset>
+          <label class="tech-demo-select">Lower study <select id="tech-demo-study">
+            <option value="volume">Volume + 20D average</option><option value="rsi">RSI 14</option>
+            <option value="macd">MACD 12,26,9</option><option value="atr">ATR 14 percent</option>
+            <option value="adx">ADX / DMI 14</option><option value="relative">Relative strength vs SPY</option>
+          </select></label>
+          <div class="tech-demo-chart">${technicalDemo(c)}</div>
+          ${caveat("ATR and ADX use split-adjusted high/low data; relative strength aligns each stock session with SPY. The options remain chart context only — they do not enter the valuation, quality score or recommendation.")}
+        </div></section>`,
+
     quality: () => `
       <section class="panel"><div class="panel-head"><div><h2>Five pillars, ranked within the industry and the market</h2>
         <p>The ranks are computed here; the vendor's own composite sits beside them, unaltered and omitted where it does not exist.</p></div></div>
@@ -1364,7 +1449,7 @@ function renderCompanyDetail(state) {
   return `${crumbs([{ label: "Stock analyzer", path: "analyzer" }, { label: c[0] }])}
   ${shell(
     `${c[0]} — ${esc(c[1])}`,
-    `${esc(c[2])}. Four research layers, each allowed to return nothing and each wrapped so a failing layer costs one column rather than the page.`,
+    `${esc(c[2])}. Six research layers, each allowed to return nothing and each wrapped so a failing layer costs one column rather than the page.`,
     `<div class="tabs">${tabs
       .map((x) => `<button class="tab ${x[0] === tab ? "active" : ""}" ${go(`analyzer/${c[0]}/${x[0]}`)}>${x[1]}</button>`)
       .join("")}</div>${body}`,
@@ -1839,6 +1924,19 @@ function bindLocal(state) {
       toast(`${b.textContent} window selected`);
     })
   );
+  document.querySelectorAll("[data-tech-overlay]").forEach((box) =>
+    box.addEventListener("change", () => {
+      document.querySelectorAll(`[data-tech-line="${box.dataset.techOverlay}"]`).forEach((line) => {
+        line.hidden = !box.checked;
+        line.style.display = box.checked ? "" : "none";
+      });
+    })
+  );
+  document.getElementById("tech-demo-study")?.addEventListener("change", (event) => {
+    document.querySelectorAll("[data-tech-study-panel]").forEach((panel) => {
+      panel.hidden = panel.dataset.techStudyPanel !== event.target.value;
+    });
+  });
 }
 
 /* --------------------------------------------------------- global chrome */
@@ -1860,7 +1958,7 @@ window.toast = toast;
 const SUBTABS = {
   books: ["overview", "contract", "trades"],
   portfolio: ["book", "changed", "risk", "outlook"],
-  analyzer: ["valuation", "quality", "forecast", "thesis"],
+  analyzer: ["valuation", "volatility", "technicals", "quality", "forecast", "thesis"],
 };
 const INDEX = [
   ...Object.entries(views).map(([k, v]) => ({ label: v.title, hint: v.eyebrow, group: "Screen", path: k })),

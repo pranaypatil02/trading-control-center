@@ -129,6 +129,27 @@ h1 { margin: 0; font-size: 25px; line-height: 1.15; letter-spacing: -.035em; }
 .chart-benchmark { fill: none; stroke: #aeb4af; stroke-width: 1.5; stroke-dasharray: 4 4; }
 .chart-point { fill: white; stroke: var(--blue); stroke-width: 2; }
 .chart-footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-top: 13px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; }
+.tech-demo-controls { border: 1px solid var(--line); border-radius: 8px; display: flex; gap: 14px; flex-wrap: wrap; padding: 10px 12px; margin: 0 0 10px; }
+.tech-demo-controls legend { color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 0 4px; }
+.tech-demo-controls label { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; }
+.tech-demo-controls input { width: auto; margin: 0; accent-color: var(--blue); }
+.tech-demo-select { display: inline-flex; align-items: center; gap: 10px; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; margin-bottom: 12px; }
+.tech-demo-select select { border: 1px solid var(--line); border-radius: 6px; background: white; color: var(--ink); font: inherit; padding: 6px 9px; text-transform: none; letter-spacing: 0; }
+.chart-range { display: inline-flex; gap: 4px; }
+.chart-range button { border: 1px solid var(--line); border-radius: 999px; background: white; color: var(--muted); padding: 5px 9px; font-size: 10px; cursor: pointer; }
+.chart-range button.active { color: white; background: var(--ink); border-color: var(--ink); }
+.tech-demo-chart { display: grid; gap: 8px; }
+.tech-demo-svg,.tech-demo-lower { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.tech-demo-svg text,.tech-demo-lower text { fill: var(--muted); font-family: inherit; font-size: 9px; }
+[data-tech-line][hidden] { display: none; }
+.tech-price { fill: none; stroke: var(--ink); stroke-width: 1.8; }
+.tech-sma20 { fill: none; stroke: #7357a8; stroke-width: 1.5; }
+.tech-sma50 { fill: none; stroke: var(--blue); stroke-width: 1.7; }
+.tech-sma200 { fill: none; stroke: #b27a2c; stroke-width: 1.7; }
+.tech-ema8 { fill: none; stroke: #b45b83; stroke-width: 1.4; }
+.tech-ema21 { fill: none; stroke: #4f7f69; stroke-width: 1.4; }
+.tech-bollinger { fill: none; stroke: #818984; stroke-width: 1.2; stroke-dasharray: 5 4; }
+.tech-zero { stroke: var(--line); stroke-width: 1; stroke-dasharray: 4 4; }
 .legend { display: flex; gap: 14px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .legend i { width: 14px; height: 2px; background: var(--blue); }

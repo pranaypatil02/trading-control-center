@@ -169,7 +169,7 @@ D.jobs.forEach((j) => push(`jobs/${j.name}`));
 push("analyzer");
 ["ALPH", "BRVO", "CDEL", "DRFT", "FLUX"].forEach((t) => {
   push(`analyzer/${t}`);
-  ["valuation", "quality", "forecast", "thesis"].forEach((s) => push(`analyzer/${t}/${s}`));
+  ["valuation", "volatility", "technicals", "quality", "forecast", "thesis"].forEach((s) => push(`analyzer/${t}/${s}`));
 });
 push("pressure");
 push("matrix");
