@@ -20,7 +20,7 @@ from playwright.sync_api import sync_playwright
 
 DOCS = pathlib.Path(__file__).resolve().parent.parent / "docs"
 BASE = (DOCS / "index.html").as_uri()
-VIEWS = ["now", "changed", "dashboard", "verified", "books", "strategies", "jobs", "portfolio",
+VIEWS = ["now", "slate", "changed", "dashboard", "verified", "books", "strategies", "jobs", "portfolio",
          "analyzer", "pressure", "matrix", "seasonality", "reports", "agent"]
 
 errors: list[str] = []

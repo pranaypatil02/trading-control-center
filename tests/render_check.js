@@ -138,6 +138,7 @@ const paths = [];
 const push = (p) => paths.push(p);
 
 push("now");
+push("slate");
 push("changed");
 push("dashboard");
 push("verified");

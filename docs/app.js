@@ -293,6 +293,47 @@ function renderNow() {
     )}`;
 }
 
+/* ---------------------------------------------------------- 0a. trade slate */
+/* Synthetic names and rounded evidence: this public prototype demonstrates
+ * the decision contract without publishing today's private recommendations. */
+function renderSlate() {
+  const rows = [
+    {rank: 1, ticker: "ALPH", side: "BUY", why: "Reversal threshold · reclaimed the 200-day average",
+     rate: "68%", range: "60–75%", n: "148 episodes · 35 dates", hold: "5 sessions", stop: "8%"},
+    {rank: 2, ticker: "BRAV", side: "SELL SHORT", why: "Prior breakout failed",
+     rate: "64%", range: "55–73%", n: "104 episodes · 34 dates", hold: "10 sessions", stop: "10%"},
+    {rank: 3, ticker: "CRUX", side: "SELL SHORT", why: "New 52-week low",
+     rate: "63%", range: "53–72%", n: "92 episodes · 28 dates", hold: "5 sessions", stop: "10%"},
+  ];
+  const body = rows.map((r) => `<tr><td class="n"><strong>${r.rank}</strong></td>
+    <td><strong>${r.ticker}</strong><small>Synthetic company</small></td>
+    <td><span class="status ${r.side === "BUY" ? "healthy" : "failing"}">${r.side}</span></td>
+    <td>${r.why}</td><td><strong>${r.rate}</strong><small>${r.range} · ${r.n}</small></td>
+    <td>Next regular-session open<small>close after ${r.hold} · ${r.stop} stop · 5% paper allocation</small></td></tr>`).join("");
+  return `${insight(
+      "3 of 5 slots passed every gate; 2 remain in cash. Live trading is disabled.",
+      "A hit rate is not an execution edge. Each recommendation is paper-filled at the next open, charged modeled slippage, stopped, and graded against SPY on the same dates."
+    )}
+    ${shell("Today’s five", "Fresh signal episodes only. Conflicting directions, near-term earnings, stale inputs and illiquid names are refused.", "", "Synthetic demo")}
+    <section class="panel"><div class="table-scroll"><table class="jobs-table wide"><thead><tr>
+      <th>#</th><th>Stock</th><th>Trade</th><th>Why now</th><th>Measured signal</th><th>Paper plan</th>
+      </tr></thead><tbody>${body}</tbody></table></div></section>
+    ${shell("Forward promotion gate", "A gate can make the system review-eligible; it cannot switch brokerage execution on.", "")}
+    ${metricCards([
+      ["Decision sessions", "1", "need 63", ""], ["Closed trades", "0", "need 100", ""],
+      ["Mean net return", "—", "after modeled fills", ""], ["Mean vs SPY", "—", "same holding window", ""]
+    ])}
+    <section class="panel"><div class="panel-head"><div><h2>Refused today — 4</h2>
+      <p>A real signal can still be an untradeable setup.</p></div></div>
+      <table class="jobs-table"><tbody>
+        <tr><td><strong>DYNM</strong></td><td>Earnings fall inside the five-session holding window</td></tr>
+        <tr><td><strong>ECHO</strong></td><td>Eligible signals conflict on direction</td></tr>
+        <tr><td><strong>FOXT</strong></td><td>Earnings fall inside the five-session holding window</td></tr>
+        <tr><td><strong>GAMM</strong></td><td>20-session dollar volume failed the liquidity gate</td></tr>
+      </tbody></table></section>
+    ${caveat("The slate combines technical triggers with value, fundamental, momentum, seasonality and earnings corroboration. Market news is a portfolio gate because the current feed does not have reliable ticker tags; the product says that instead of inventing stock-level sentiment.")}`;
+}
+
 /* -------------------------------------------------------------- 0b. changed */
 function renderChanged() {
   const c = D.changed || {};
@@ -1771,6 +1812,7 @@ function renderAgent() {
  * the same table and shows it under the title at all times. */
 const PURPOSE = {
   now: "Everything that needs a decision, ranked by consequence, each row carrying where it lives and what to do about it.",
+  slate: "The few executable paper trades that remain after evidence, conflict, earnings, liquidity and market-news gates.",
   changed: "What moved since the last completed market session — the daily question a page showing only <em>now</em> cannot answer.",
   dashboard: "The size and standing of the estate: how much is registered, how much is running, and how much of it has earned the right to be ranked.",
   verified: "Whether the signals this system published turned out to be right, graded against the benchmark you could have owned instead.",
@@ -1789,6 +1831,7 @@ const PURPOSE = {
 /* ----------------------------------------------------------------- router */
 const views = {
   now: { title: "What needs a decision", eyebrow: "Front door · ranked by consequence", render: renderNow },
+  slate: { title: "Trade slate", eyebrow: "Paper recommendations · live disabled", render: renderSlate },
   changed: { title: "What changed", eyebrow: "Since the last completed session", render: renderChanged },
   dashboard: { title: "Platform dashboard", eyebrow: "Scale and standing · operating view", render: renderDashboard },
   verified: { title: "Were they right?", eyebrow: "Signal verification · measured outcomes", render: renderVerified },

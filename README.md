@@ -55,6 +55,18 @@ value, credential, local path, or order control is published.
 
 [![Latest sanitized Platform Dashboard](screenshots/23-platform-dashboard-latest.png)](https://pranaypatil02.github.io/trading-control-center/)
 
+### Latest product update — an outcome-based trade slate
+
+The platform now reduces its screen inventory to at most five executable paper
+trades. Each recommendation declares direction, next-open entry, stop, holding
+horizon, modeled cost, benchmark-relative evidence, and why it survived the
+conflict, earnings, liquidity, and market-news gates. Empty slots stay cash.
+Live brokerage execution remains disabled until a separate forward record
+clears its predeclared promotion gate. [Read the case study](docs/trade-slate.md)
+or [open the synthetic Trade Slate](https://pranaypatil02.github.io/trading-control-center/#slate).
+
+![Synthetic outcome-based trade slate](screenshots/46-trade-slate.png)
+
 <table>
   <tr>
     <td width="50%"><a href="https://pranaypatil02.github.io/trading-control-center/#verified/NEW_52W_LOW"><img src="screenshots/33-drilldown-event-detail.png" alt="Two levels down: one signal type, every horizon, and the stocks where it worked and failed"></a></td>
