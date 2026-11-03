@@ -78,6 +78,17 @@ or [open the synthetic Trade Slate](https://pranaypatil02.github.io/trading-cont
   </tr>
 </table>
 
+### Latest product update — visible research evidence gaps
+
+Stock research now shows coverage of growth, fundamentals, funding, sector
+conditions and six supporting thesis topics. Missing core evidence or rejected
+required paragraphs withhold the model valuation while useful partial research
+remains visible. Verified source passages and dated thesis history help the
+operator inspect the argument and its limits. [Read the product case
+study](docs/research-evidence-coverage.md).
+
+![Synthetic research evidence coverage demonstration](screenshots/46-research-evidence-coverage.png)
+
 ### Latest product update — explained technical ratings
 
 Every company page now pairs its daily chart with **Summary, Moving Averages,
