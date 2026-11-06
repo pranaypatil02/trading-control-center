@@ -78,6 +78,17 @@ or [open the synthetic Trade Slate](https://pranaypatil02.github.io/trading-cont
   </tr>
 </table>
 
+### Latest product update — traceable signal corrections
+
+Daily bars now require post-close observation evidence before they can resolve
+signal outcomes. Reviewed corrections preserve the original measurements and
+surface integrity status ahead of performance. The completed reconciliation
+accepted 136 outcomes, including six directional verdict changes, with zero
+unresolved discrepancies. See the [outcome integrity case study](docs/signal-outcome-integrity.md)
+for the evidence gaps, guardrails and validation.
+
+![Synthetic signal outcome integrity demonstration](screenshots/47-signal-outcome-integrity.png)
+
 ### Latest product update — visible research evidence gaps
 
 Stock research now shows coverage of growth, fundamentals, funding, sector
