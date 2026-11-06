@@ -55,6 +55,16 @@ value, credential, local path, or order control is published.
 
 [![Latest sanitized Platform Dashboard](screenshots/23-platform-dashboard-latest.png)](https://pranaypatil02.github.io/trading-control-center/)
 
+### Latest product update — on-demand research within a daily budget
+
+Missing detailed reports can now be generated from the company view. Cached
+research opens without an API call; new hosted work shares a three-attempt /
+$0.50 daily ceiling across browser tabs and scheduled runs. Reservations,
+explicit retries and source-passage checks make both cost and research gaps
+visible. [Read the case study](docs/budgeted-detailed-reports.md).
+
+![Synthetic budgeted research demonstration](screenshots/48-budgeted-detailed-reports.png)
+
 ### Latest product update — an outcome-based trade slate
 
 The platform now reduces its screen inventory to at most five executable paper
